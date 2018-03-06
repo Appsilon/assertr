@@ -55,7 +55,11 @@
 #'
 #' @export
 assert <- function(data, predicate, ..., success_fun=success_continue,
-                      error_fun=error_stop, title = NULL){
+                      error_fun=error_stop, title = NULL, prediction_must_pass = FALSE){
+  skip_rule <- attr(data, "skip_following_rules")
+  if (isTRUE(skip_rule))
+    return(success_fun(data))
+
   keeper.vars <- dplyr::quos(...)
   sub.frame <- dplyr::select(data, rlang::UQS(keeper.vars))
   validation_id <- generate_id()
@@ -120,6 +124,8 @@ assert <- function(data, predicate, ..., success_fun=success_continue,
 
   # remove the elements corresponding to the columns without errors
   errors <- Filter(function(x) !is.null(x), errors)
+  if (prediction_must_pass)
+    attr(data, "skip_following_rules") <- TRUE
   error_fun(errors, data=data)
 }
 
@@ -180,7 +186,11 @@ assert <- function(data, predicate, ..., success_fun=success_continue,
 #'
 assert_rows <- function(data, row_reduction_fn, predicate, ...,
                          success_fun=success_continue,
-                         error_fun=error_stop, title = NULL){
+                         error_fun=error_stop, title = NULL, prediction_must_pass = FALSE){
+  skip_rule <- attr(data, "skip_following_rules")
+  if (isTRUE(skip_rule))
+    return(success_fun(data))
+
   keeper.vars <- dplyr::quos(...)
   sub.frame <- dplyr::select(data, rlang::UQS(keeper.vars))
   name.of.row.redux.fn <- lazyeval::expr_text(row_reduction_fn)
@@ -240,6 +250,8 @@ assert_rows <- function(data, row_reduction_fn, predicate, ...,
                                           num.violations,
                                           loc.violations,
                                           validation_id)
+  if (prediction_must_pass)
+    attr(data, "skip_following_rules") <- TRUE
   error_fun(list(error), data=data)
 
 }
@@ -300,7 +312,11 @@ assert_rows <- function(data, row_reduction_fn, predicate, ...,
 #' @export
 insist <- function(data, predicate_generator, ...,
                     success_fun=success_continue,
-                    error_fun=error_stop, title = NULL){
+                    error_fun=error_stop, title = NULL, prediction_must_pass = FALSE) {
+  skip_rule <- attr(data, "skip_following_rules")
+  if (isTRUE(skip_rule))
+    return(success_fun(data))
+
   keeper.vars <- dplyr::quos(...)
   sub.frame <- dplyr::select(data, rlang::UQS(keeper.vars))
   name.of.predicate.generator <- lazyeval::expr_text(predicate_generator)
@@ -366,6 +382,8 @@ insist <- function(data, predicate_generator, ...,
   # remove the elements corresponding to the columns without errors
   errors <- Filter(function(x) !is.null(x), errors)
 
+  if (prediction_must_pass)
+    attr(data, "skip_following_rules") <- TRUE
   error_fun(errors, data=data)
 }
 
@@ -430,7 +448,11 @@ insist <- function(data, predicate_generator, ...,
 #'
 insist_rows <- function(data, row_reduction_fn, predicate_generator, ...,
                          success_fun=success_continue,
-                         error_fun=error_stop, title = NULL){
+                         error_fun=error_stop, title = NULL, prediction_must_pass = FALSE) {
+  skip_rule <- attr(data, "skip_following_rules")
+  if (isTRUE(skip_rule))
+    return(success_fun(data))
+
   keeper.vars <- dplyr::quos(...)
   sub.frame <- dplyr::select(data, rlang::UQS(keeper.vars))
   name.of.row.redux.fn <- lazyeval::expr_text(row_reduction_fn)
@@ -488,6 +510,8 @@ insist_rows <- function(data, row_reduction_fn, predicate_generator, ...,
                                           name.of.predicate.generator,
                                           num.violations,
                                           loc.violations)
+  if (prediction_must_pass)
+    attr(data, "skip_following_rules") <- TRUE
   error_fun(list(error), data=data)
 }
 
@@ -550,7 +574,10 @@ insist_rows <- function(data, row_reduction_fn, predicate_generator, ...,
 #'
 #' @export
 verify <- function(data, expr, success_fun=success_continue,
-                   error_fun=error_stop, title = NULL){
+                   error_fun=error_stop, title = NULL, prediction_must_pass = FALSE){
+  skip_rule <- attr(data, "skip_following_rules")
+  if (isTRUE(skip_rule)) return(success_fun(data))
+
   expr <- substitute(expr)
   # conform to terminology from subset
   envir <- data
@@ -587,5 +614,7 @@ verify <- function(data, expr, success_fun=success_continue,
   num.violations <- sum(!logical.results)
   if(num.violations==0) return(error_fun(list(), data=data))
   error <- make.assertr.verify.error(num.violations, paste(deparse(expr), collapse = " "), validation_id)
+  if (prediction_must_pass)
+    attr(data, "skip_following_rules") <- TRUE
   error_fun(list(error), data=data)
 }

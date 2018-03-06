@@ -7,7 +7,8 @@
 after applying row reduction function}
 \usage{
 insist_rows(data, row_reduction_fn, predicate_generator, ...,
-  success_fun = success_continue, error_fun = error_stop, title = NULL)
+  success_fun = success_continue, error_fun = error_stop, title = NULL,
+  prediction_must_pass = FALSE)
 
 insist_rows_(data, row_reduction_fn, predicate_generator, ..., .dots,
   success_fun = success_continue, error_fun = error_stop)

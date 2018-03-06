@@ -6,7 +6,7 @@
 \title{Raises error if predicate is FALSE in any columns selected}
 \usage{
 assert(data, predicate, ..., success_fun = success_continue,
-  error_fun = error_stop, title = NULL)
+  error_fun = error_stop, title = NULL, prediction_must_pass = FALSE)
 
 assert_(data, predicate, ..., .dots, success_fun = success_continue,
   error_fun = error_stop)
