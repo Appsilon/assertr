@@ -6,7 +6,8 @@
 \title{Raises error if dynamically created predicate is FALSE in any columns selected}
 \usage{
 insist(data, predicate_generator, ..., success_fun = success_continue,
-  error_fun = error_stop, title = NULL, prediction_must_pass = FALSE)
+  error_fun = error_stop, skip_fun = success_continue, title = NULL,
+  mark_data_corrupted_on_failure = FALSE)
 
 insist_(data, predicate_generator, ..., .dots, success_fun = success_continue,
   error_fun = error_stop)

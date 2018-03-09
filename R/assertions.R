@@ -54,11 +54,12 @@
 #'   # nothing here will run}
 #'
 #' @export
-assert <- function(data, predicate, ..., success_fun=success_continue,
-                      error_fun=error_stop, title = NULL, prediction_must_pass = FALSE){
-  skip_rule <- attr(data, "skip_following_rules")
+assert <- function(data, predicate, ...,
+                   success_fun=success_continue, error_fun=error_stop, skip_fun=success_continue,
+                   title = NULL, mark_data_corrupted_on_failure = FALSE) {
+  skip_rule <- attr(data, "is_corrupted")
   if (isTRUE(skip_rule))
-    return(success_fun(data))
+    return(skip_fun(data))
 
   keeper.vars <- dplyr::quos(...)
   sub.frame <- dplyr::select(data, rlang::UQS(keeper.vars))
@@ -124,8 +125,8 @@ assert <- function(data, predicate, ..., success_fun=success_continue,
 
   # remove the elements corresponding to the columns without errors
   errors <- Filter(function(x) !is.null(x), errors)
-  if (prediction_must_pass)
-    attr(data, "skip_following_rules") <- TRUE
+  if (mark_data_corrupted_on_failure)
+    attr(data, "is_corrupted") <- TRUE
   error_fun(errors, data=data)
 }
 
@@ -185,11 +186,11 @@ assert <- function(data, predicate, ..., success_fun=success_continue,
 #' @export
 #'
 assert_rows <- function(data, row_reduction_fn, predicate, ...,
-                         success_fun=success_continue,
-                         error_fun=error_stop, title = NULL, prediction_must_pass = FALSE){
-  skip_rule <- attr(data, "skip_following_rules")
+                        success_fun=success_continue, error_fun=error_stop, skip_fun=success_continue,
+                        title = NULL, mark_data_corrupted_on_failure = FALSE){
+  skip_rule <- attr(data, "is_corrupted")
   if (isTRUE(skip_rule))
-    return(success_fun(data))
+    return(skip_fun(data))
 
   keeper.vars <- dplyr::quos(...)
   sub.frame <- dplyr::select(data, rlang::UQS(keeper.vars))
@@ -250,8 +251,8 @@ assert_rows <- function(data, row_reduction_fn, predicate, ...,
                                           num.violations,
                                           loc.violations,
                                           validation_id)
-  if (prediction_must_pass)
-    attr(data, "skip_following_rules") <- TRUE
+  if (mark_data_corrupted_on_failure)
+    attr(data, "is_corrupted") <- TRUE
   error_fun(list(error), data=data)
 
 }
@@ -311,11 +312,11 @@ assert_rows <- function(data, row_reduction_fn, predicate, ...,
 #'
 #' @export
 insist <- function(data, predicate_generator, ...,
-                    success_fun=success_continue,
-                    error_fun=error_stop, title = NULL, prediction_must_pass = FALSE) {
-  skip_rule <- attr(data, "skip_following_rules")
+                   success_fun=success_continue, error_fun=error_stop, skip_fun=success_continue,
+                   title = NULL, mark_data_corrupted_on_failure = FALSE) {
+  skip_rule <- attr(data, "is_corrupted")
   if (isTRUE(skip_rule))
-    return(success_fun(data))
+    return(skip_fun(data))
 
   keeper.vars <- dplyr::quos(...)
   sub.frame <- dplyr::select(data, rlang::UQS(keeper.vars))
@@ -382,8 +383,8 @@ insist <- function(data, predicate_generator, ...,
   # remove the elements corresponding to the columns without errors
   errors <- Filter(function(x) !is.null(x), errors)
 
-  if (prediction_must_pass)
-    attr(data, "skip_following_rules") <- TRUE
+  if (mark_data_corrupted_on_failure)
+    attr(data, "is_corrupted") <- TRUE
   error_fun(errors, data=data)
 }
 
@@ -447,11 +448,11 @@ insist <- function(data, predicate_generator, ...,
 #' @export
 #'
 insist_rows <- function(data, row_reduction_fn, predicate_generator, ...,
-                         success_fun=success_continue,
-                         error_fun=error_stop, title = NULL, prediction_must_pass = FALSE) {
-  skip_rule <- attr(data, "skip_following_rules")
+                        success_fun=success_continue, error_fun=error_stop, skip_fun=success_continue,
+                        title = NULL, mark_data_corrupted_on_failure = FALSE) {
+  skip_rule <- attr(data, "is_corrupted")
   if (isTRUE(skip_rule))
-    return(success_fun(data))
+    return(skip_fun(data))
 
   keeper.vars <- dplyr::quos(...)
   sub.frame <- dplyr::select(data, rlang::UQS(keeper.vars))
@@ -510,8 +511,8 @@ insist_rows <- function(data, row_reduction_fn, predicate_generator, ...,
                                           name.of.predicate.generator,
                                           num.violations,
                                           loc.violations)
-  if (prediction_must_pass)
-    attr(data, "skip_following_rules") <- TRUE
+  if (mark_data_corrupted_on_failure)
+    attr(data, "is_corrupted") <- TRUE
   error_fun(list(error), data=data)
 }
 
@@ -573,10 +574,11 @@ insist_rows <- function(data, row_reduction_fn, predicate_generator, ...,
 #'
 #'
 #' @export
-verify <- function(data, expr, success_fun=success_continue,
-                   error_fun=error_stop, title = NULL, prediction_must_pass = FALSE){
-  skip_rule <- attr(data, "skip_following_rules")
-  if (isTRUE(skip_rule)) return(success_fun(data))
+verify <- function(data, expr,
+                   success_fun=success_continue, error_fun=error_stop, skip_fun=success_continue,
+                   title = NULL, mark_data_corrupted_on_failure = FALSE){
+  skip_rule <- attr(data, "is_corrupted")
+  if (isTRUE(skip_rule)) return(skip_fun(data))
 
   expr <- substitute(expr)
   # conform to terminology from subset
@@ -614,7 +616,7 @@ verify <- function(data, expr, success_fun=success_continue,
   num.violations <- sum(!logical.results)
   if(num.violations==0) return(error_fun(list(), data=data))
   error <- make.assertr.verify.error(num.violations, paste(deparse(expr), collapse = " "), validation_id)
-  if (prediction_must_pass)
-    attr(data, "skip_following_rules") <- TRUE
+  if (mark_data_corrupted_on_failure)
+    attr(data, "is_corrupted") <- TRUE
   error_fun(list(error), data=data)
 }

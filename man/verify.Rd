@@ -5,7 +5,8 @@
 \title{Raises error if expression is FALSE anywhere}
 \usage{
 verify(data, expr, success_fun = success_continue, error_fun = error_stop,
-  title = NULL, prediction_must_pass = FALSE)
+  skip_fun = success_continue, title = NULL,
+  mark_data_corrupted_on_failure = FALSE)
 }
 \arguments{
 \item{data}{A data frame, list, or environment}
