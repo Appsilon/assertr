@@ -95,17 +95,16 @@ assert <- function(data, predicate, ...,
                       return(apply.predicate.to.vector(this.vector,
                                                        predicate))})
 
+  result <- length(log.mat[[1]]) == 0 || all(log.mat)
   if (!is.null(title)) {
-    result <- all(log.mat)
     attr(data, "assertr_results") <- append(
       attr(data, "assertr_results"),
       list(data.frame(title = title, result = result, validation_id = validation_id, stringsAsFactors = FALSE)))
   }
 
   # if all checks pass *and* there are no leftover errors
-  if(all(log.mat) && is.null(attr(data, "assertr_errors")))
+  if(result && is.null(attr(data, "assertr_errors")))
     return(success_fun(data))
-
 
   errors <- lapply(colnames(log.mat), function(col.name){
     col <- log.mat[, col.name]
