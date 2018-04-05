@@ -327,8 +327,8 @@ chain_end <- function(data, success_fun=success_continue,
 #' @param data A data frame
 #' @export
 clear_results <- function(data) {
-  is_data_corrupted <- attr(data, "is_corrupted")
-  if (!isTRUE(is_data_corrupted)) {
+  is_data_corrupted <- isTRUE(attr(data, "is_corrupted"))
+  if (!is_data_corrupted) {
     attr(data, "assertr_results") <- NULL
     attr(data, "assertr_errors") <- NULL
   }
