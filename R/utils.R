@@ -81,3 +81,18 @@ has_all_names <- function(...){
 generate_id <- function() {
   paste0(sample(c(LETTERS, letters, 0:9), 20, TRUE), collapse = "")
 }
+
+#' Returns vector of classes for selected dataset
+#'
+#' @param ... data.frame or set of vectors dicided by \code{,}
+#' @return vector of classes for each variable of data.frame, or for each passed variable
+#'
+#' @export
+v_class <- function(...) {
+  data <- list(...)
+  if (is.data.frame(data[[1]])) {
+    unname(unlist(lapply(data[[1]], "class")))
+  } else {
+    unlist(lapply(data, "class"))
+  }
+}
