@@ -1,11 +1,12 @@
 assertr
 ===
 
-![assertr logo](http://statethatiamin.onlythisrose.com/assertrlogo.png)
+Appsilon `assertr` fork. See details:
 
-[![Build Status](http://travis-ci.org/ropensci/assertr.svg?branch=master)](https://travis-ci.org/ropensci/assertr)
-[![](http://www.r-pkg.org/badges/version/assertr)](https://cran.r-project.org/package=assertr)
-[![CRAN RStudio mirror downloads](http://cranlogs.r-pkg.org/badges/assertr)](https://cran.r-project.org/package=assertr)
+* Youtube: https://www.youtube.com/watch?v=zsQEBTDAtPk
+* Presentation https://www.slideshare.net/appsilon/tech-talk-data-validation-with-assertr
+
+===
 
 ### What is it?
 The assertr package supplies a suite of functions designed to verify
