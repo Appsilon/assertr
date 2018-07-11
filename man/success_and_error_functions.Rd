@@ -9,6 +9,7 @@
 \alias{error_report}
 \alias{warn_report}
 \alias{error_append}
+\alias{append_as_warning}
 \alias{error_return}
 \alias{error_logical}
 \title{Success and error functions}
@@ -26,6 +27,8 @@ error_report(errors, data = NULL, warn = FALSE, ...)
 warn_report(errors, data = NULL)
 
 error_append(errors, data = NULL)
+
+append_as_warning(warnings, data = NULL)
 
 error_return(errors, data = NULL)
 
