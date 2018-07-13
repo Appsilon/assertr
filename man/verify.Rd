@@ -6,7 +6,7 @@
 \usage{
 verify(data, expr, success_fun = success_continue, error_fun = error_stop,
   skip_fun = success_continue, title = NULL,
-  mark_data_corrupted_on_failure = FALSE)
+  mark_data_corrupted_on_failure = FALSE, ignore_chain_funs = FALSE)
 }
 \arguments{
 \item{data}{A data frame, list, or environment}

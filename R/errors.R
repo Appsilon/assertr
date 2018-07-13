@@ -252,6 +252,15 @@ error_append <- function(errors, data=NULL){
 
 #' @export
 #' @rdname success_and_error_functions
+append_as_warning <- function(warnings, data=NULL){
+  if(is.null(attr(data, "assertr_warnings")))
+    attr(data, "assertr_warnings") <- list()
+  attr(data, "assertr_warnings") <- append(attr(data, "assertr_warnings"), warnings)
+  return(data)
+}
+
+#' @export
+#' @rdname success_and_error_functions
 error_return <- function(errors, data=NULL){
   if(!is.null(data) && !is.null(attr(data, "assertr_errors")))
     errors <- append(attr(data, "assertr_errors"), errors)

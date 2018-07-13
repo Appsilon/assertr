@@ -56,7 +56,7 @@
 #' @export
 assert <- function(data, predicate, ...,
                    success_fun=success_continue, error_fun=error_stop, skip_fun=success_continue,
-                   title = NULL, mark_data_corrupted_on_failure = FALSE) {
+                   title = NULL, mark_data_corrupted_on_failure = FALSE, ignore_chain_funs = FALSE) {
   skip_rule <- attr(data, "is_corrupted")
   if (isTRUE(skip_rule))
     return(skip_fun(data))
@@ -71,13 +71,13 @@ assert <- function(data, predicate, ...,
 
   success_fun_override <- attr(data, "assertr_in_chain_success_fun_override")
   if(!is.null(success_fun_override)){
-    if(!identical(success_fun, success_fun_override))
+    if(!ignore_chain_funs && !identical(success_fun, success_fun_override))
       # warning("user defined success_fun overridden by assertr chain")
     success_fun <- success_fun_override
   }
   error_fun_override <- attr(data, "assertr_in_chain_error_fun_override")
-  if(!is.null(error_fun_override)){
-    if(!identical(error_fun, error_fun_override))
+  if(!ignore_chain_funs && !is.null(error_fun_override)){
+    if(!ignore_chain_funs && !identical(error_fun, error_fun_override))
       # warning("user defined error_fun overriden by assertr chain")
     error_fun <- error_fun_override
   }
@@ -103,7 +103,7 @@ assert <- function(data, predicate, ...,
   }
 
   # if all checks pass *and* there are no leftover errors
-  if(result && is.null(attr(data, "assertr_errors")))
+  if(result && is.null(attr(data, "assertr_errors")) && is.null(attr(data, "assertr_warnings")))
     return(success_fun(data))
 
   errors <- lapply(colnames(log.mat), function(col.name){
@@ -186,7 +186,7 @@ assert <- function(data, predicate, ...,
 #'
 assert_rows <- function(data, row_reduction_fn, predicate, ...,
                         success_fun=success_continue, error_fun=error_stop, skip_fun=success_continue,
-                        title = NULL, mark_data_corrupted_on_failure = FALSE){
+                        title = NULL, mark_data_corrupted_on_failure = FALSE, ignore_chain_funs = FALSE){
   skip_rule <- attr(data, "is_corrupted")
   if (isTRUE(skip_rule))
     return(skip_fun(data))
@@ -205,18 +205,18 @@ assert_rows <- function(data, row_reduction_fn, predicate, ...,
 
   success_fun_override <- attr(data, "assertr_in_chain_success_fun_override")
   if(!is.null(success_fun_override)){
-    if(!identical(success_fun, success_fun_override))
+    if(!ignore_chain_funs && !identical(success_fun, success_fun_override))
       # warning("user defined success_fun overridden by assertr chain")
     success_fun <- success_fun_override
   }
   error_fun_override <- attr(data, "assertr_in_chain_error_fun_override")
   if(!is.null(error_fun_override)){
-    if(!identical(error_fun, error_fun_override))
+    if(!ignore_chain_funs && !identical(error_fun, error_fun_override))
       # warning("user defined error_fun overriden by assertr chain")
     error_fun <- error_fun_override
   }
 
-  if(!is.null(title) && is.null(attr(data, "assertr_results")))
+  if(!is.null(title) && is.null(attr(data, "assertr_results")) && is.null(attr(data, "assertr_warnings")))
     attr(data, "assertr_results") <- list()
 
   if(!is.vectorized.predicate(predicate))
@@ -312,7 +312,7 @@ assert_rows <- function(data, row_reduction_fn, predicate, ...,
 #' @export
 insist <- function(data, predicate_generator, ...,
                    success_fun=success_continue, error_fun=error_stop, skip_fun=success_continue,
-                   title = NULL, mark_data_corrupted_on_failure = FALSE) {
+                   title = NULL, mark_data_corrupted_on_failure = FALSE, ignore_chain_funs = FALSE) {
   skip_rule <- attr(data, "is_corrupted")
   if (isTRUE(skip_rule))
     return(skip_fun(data))
@@ -327,18 +327,18 @@ insist <- function(data, predicate_generator, ...,
 
   success_fun_override <- attr(data, "assertr_in_chain_success_fun_override")
   if(!is.null(success_fun_override)){
-    if(!identical(success_fun, success_fun_override))
+    if(!ignore_chain_funs && !identical(success_fun, success_fun_override))
       # warning("user defined success_fun overridden by assertr chain")
     success_fun <- success_fun_override
   }
   error_fun_override <- attr(data, "assertr_in_chain_error_fun_override")
   if(!is.null(error_fun_override)){
-    if(!identical(error_fun, error_fun_override))
+    if(!ignore_chain_funs && !identical(error_fun, error_fun_override))
       # warning("user defined error_fun overriden by assertr chain")
     error_fun <- error_fun_override
   }
 
-  if(!is.null(title) && is.null(attr(data, "assertr_results")))
+  if(!is.null(title) && is.null(attr(data, "assertr_results")) && is.null(attr(data, "assertr_warnings")))
     attr(data, "assertr_results") <- list()
 
   # get true predicates (not the generator)
@@ -448,7 +448,7 @@ insist <- function(data, predicate_generator, ...,
 #'
 insist_rows <- function(data, row_reduction_fn, predicate_generator, ...,
                         success_fun=success_continue, error_fun=error_stop, skip_fun=success_continue,
-                        title = NULL, mark_data_corrupted_on_failure = FALSE) {
+                        title = NULL, mark_data_corrupted_on_failure = FALSE, ignore_chain_funs = FALSE) {
   skip_rule <- attr(data, "is_corrupted")
   if (isTRUE(skip_rule))
     return(skip_fun(data))
@@ -467,13 +467,13 @@ insist_rows <- function(data, row_reduction_fn, predicate_generator, ...,
 
   success_fun_override <- attr(data, "assertr_in_chain_success_fun_override")
   if(!is.null(success_fun_override)){
-    if(!identical(success_fun, success_fun_override))
+    if(!ignore_chain_funs && !identical(success_fun, success_fun_override))
       # warning("user defined success_fun overridden by assertr chain")
     success_fun <- success_fun_override
   }
   error_fun_override <- attr(data, "assertr_in_chain_error_fun_override")
   if(!is.null(error_fun_override)){
-    if(!identical(error_fun, error_fun_override))
+    if(!ignore_chain_funs && !identical(error_fun, error_fun_override))
       # warning("user defined error_fun overriden by assertr chain")
     error_fun <- error_fun_override
   }
@@ -495,7 +495,7 @@ insist_rows <- function(data, row_reduction_fn, predicate_generator, ...,
   }
 
   # if all checks pass *and* there are no leftover errors
-  if(all(log.vec) && is.null(attr(data, "assertr_errors")))
+  if(all(log.vec) && is.null(attr(data, "assertr_errors")) && is.null(attr(data, "assertr_warnings")))
     return(success_fun(data))
 
   num.violations <- sum(!log.vec)
@@ -575,7 +575,7 @@ insist_rows <- function(data, row_reduction_fn, predicate_generator, ...,
 #' @export
 verify <- function(data, expr,
                    success_fun=success_continue, error_fun=error_stop, skip_fun=success_continue,
-                   title = NULL, mark_data_corrupted_on_failure = FALSE){
+                   title = NULL, mark_data_corrupted_on_failure = FALSE, ignore_chain_funs = FALSE){
   skip_rule <- attr(data, "is_corrupted")
   if (isTRUE(skip_rule)) return(skip_fun(data))
 
@@ -588,18 +588,18 @@ verify <- function(data, expr,
 
   success_fun_override <- attr(data, "assertr_in_chain_success_fun_override")
   if(!is.null(success_fun_override)){
-    if(!identical(success_fun, success_fun_override))
+    if(!ignore_chain_funs && !identical(success_fun, success_fun_override))
       # warning("user defined success_fun overridden by assertr chain")
     success_fun <- success_fun_override
   }
   error_fun_override <- attr(data, "assertr_in_chain_error_fun_override")
   if(!is.null(error_fun_override)){
-    if(!identical(error_fun, error_fun_override))
+    if(!ignore_chain_funs && !identical(error_fun, error_fun_override))
       # warning("user defined error_fun overriden by assertr chain")
     error_fun <- error_fun_override
   }
 
-  if(!is.null(title) && is.null(attr(data, "assertr_results")))
+  if(!is.null(title) && is.null(attr(data, "assertr_results")) && is.null(attr(data, "assertr_warnings")))
     attr(data, "assertr_results") <- list()
 
   if (!is.null(title)) {
