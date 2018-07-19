@@ -96,3 +96,4 @@ v_class <- function(...) {
     unlist(lapply(data, "class"))
   }
 }
+

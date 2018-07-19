@@ -9,7 +9,7 @@ after applying row reduction function}
 insist_rows(data, row_reduction_fn, predicate_generator, ...,
   success_fun = success_continue, error_fun = error_stop,
   skip_fun = success_continue, title = NULL,
-  mark_data_corrupted_on_failure = FALSE)
+  mark_data_corrupted_on_failure = FALSE, ignore_chain_funs = FALSE)
 
 insist_rows_(data, row_reduction_fn, predicate_generator, ..., .dots,
   success_fun = success_continue, error_fun = error_stop)

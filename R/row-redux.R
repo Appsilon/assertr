@@ -156,3 +156,12 @@ col_concat <- function(data, sep=""){
   apply(data, 1, paste0, collapse=sep)
 }
 attr(col_concat, "call") <- "col_concat"
+
+#' @export
+is_col_duplicated <- function(data, allow.na = FALSE) {
+  if(!(any(class(data) %in% c("matrix", "data.frame"))))
+    stop("\"data\" must be a data.frame (or matrix)", call.=FALSE)
+  data <- apply(data, 2, function(x) !is_uniq(x, allow.na = allow.na))
+  apply(data, 1, any)
+}
+attr(is_col_duplicated, "call") <- "is_col_duplicated"
