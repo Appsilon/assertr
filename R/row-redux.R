@@ -157,11 +157,46 @@ col_concat <- function(data, sep=""){
 }
 attr(col_concat, "call") <- "col_concat"
 
+
+#' Check for each data row if any value has duplicates within its column
+#'
+#' This function will return a vector, with the same length as the number
+#' of rows of the provided data frame. Each element of the vector will be
+#' logical value that states if any value from row id duplicated within the
+#' column that the value comes from.
+#'
+#' @param data A data frame
+#' @param allow.na TRUE if we allow NAs in data. Default FALSE.
+#' @return A logical vector.
+#' @seealso \code{\link{paste}}
+#' @examples
+#'
+#' df <- data.frame(v1 = c(1, 1, 2, 3), v2 = c(4, 5, 5, 6))
+#' any_value_has_duplicates_in_col(df)
+#'
+#' library(magrittr)            # for piping operator
+#'
+#' # you can use "assert_rows", "in_set", and this function to
+#' # check if specified variables set and all subsets are keys for the data.
+#'
+#' correct_df <- data.frame(id = 1:5, sub_id = letters[1:5], work_id = LETTERS[1:5])
+#' correct_df %>%
+#'   assert_rows(any_value_has_duplicates_in_col, in_set(FALSE), id, sub_id, work_id)
+#'   # pases because each subset of correct_df variables is key
+#'
+#' \dontrun{
+#' incorrect_df <- data.frame(id = 1:5, sub_id = letters[1:5], age = c(10, 20, 20, 15, 30))
+#' incorrect_df %>%
+#'   assert_rows(any_value_has_duplicates_in_col, in_set(FALSE), id, sub_id, age)
+#'   # failes because age is not key of the data (age == 20 is placed twice)
+#' }
+#'
 #' @export
-is_col_duplicated <- function(data, allow.na = FALSE) {
+#' @export
+any_value_has_duplicates_in_col <- function(data, allow.na = FALSE) {
   if(!(any(class(data) %in% c("matrix", "data.frame"))))
     stop("\"data\" must be a data.frame (or matrix)", call.=FALSE)
   data <- apply(data, 2, function(x) !is_uniq(x, allow.na = allow.na))
   apply(data, 1, any)
 }
-attr(is_col_duplicated, "call") <- "is_col_duplicated"
+attr(any_value_has_duplicates_in_col, "call") <- "any_value_has_duplicates_in_col"
