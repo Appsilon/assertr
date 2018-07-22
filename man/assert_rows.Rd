@@ -9,7 +9,7 @@ row reduction function}
 assert_rows(data, row_reduction_fn, predicate, ...,
   success_fun = success_continue, error_fun = error_stop,
   skip_fun = success_continue, title = NULL,
-  mark_data_corrupted_on_failure = FALSE)
+  mark_data_corrupted_on_failure = FALSE, ignore_chain_funs = FALSE)
 
 assert_rows_(data, row_reduction_fn, predicate, ..., .dots,
   success_fun = success_continue, error_fun = error_stop)
