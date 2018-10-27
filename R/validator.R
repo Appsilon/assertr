@@ -69,10 +69,10 @@ Validator <- R6::R6Class(
         cat("Validator is empty")
       }
     },
-    add_validations = function(data, file_path = NULL) {
+    add_validations = function(data, name = deparse(substitute(data))) {
       errors <- get_validations_attribute(data, "assertr_errors")
       warnings <- get_validations_attribute(data, "assertr_warnings")
-      object_name <- ifelse(is.null(attr(data, "ribbon-title")), deparse(substitute(data)), attr(data, "ribbon-title"))
+      object_name <- name
       results <- create_validation_results(data, errors, warnings, object_name)
       private$validation_results <- bind_rows(private$validation_results, results)
       invisible(self)
