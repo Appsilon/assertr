@@ -54,7 +54,7 @@ create_validation_results <- function(data, errors, warnings, object_name) {
 #' @section Methods:
 #' \describe{
 #' \item{\code{add_validations(data, name)}}{This method adds \code{assertr} validation results to the report.}
-#' \item{\code{get_validations()}}{This method returns list of current validations.}
+#' \item{\code{get_validations(type)}}{This method returns summary of current validations. \code{type} can be "data.frame" or "json"}
 Validator <- R6::R6Class(
   classname = "Validator",
   public = list(
