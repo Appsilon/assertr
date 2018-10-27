@@ -69,7 +69,7 @@ Validator <- R6::R6Class(
         cat("Validator is empty")
       }
     },
-    add_validations = function(data, name = deparse(substitute(data)), file_path = NULL) {
+    add_validations = function(data, name = deparse(substitute(data))) {
       errors <- get_validations_attribute(data, "assertr_errors")
       warnings <- get_validations_attribute(data, "assertr_warnings")
       object_name <- name
