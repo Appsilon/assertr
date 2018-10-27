@@ -53,7 +53,7 @@ create_validation_results <- function(data, errors, warnings, object_name) {
 #' validator <- Validator$new()
 #' @section Methods:
 #' \describe{
-#' \item{\code{add_validations(data, file_path = NULL)}}{This method adds \code{assertr} validation results to the report.}
+#' \item{\code{add_validations(data, name)}}{This method adds \code{assertr} validation results to the report.}
 #' \item{\code{get_validations()}}{This method returns list of current validations.}
 Validator <- R6::R6Class(
   classname = "Validator",
@@ -77,8 +77,14 @@ Validator <- R6::R6Class(
       private$validation_results <- bind_rows(private$validation_results, results)
       invisible(self)
     },
-    get_validations = function() {
-      private$validation_results
+    get_validations = function(type = "data.frame") {
+      if (type == "data.frame") {
+        private$validation_results
+      } else if (type == "json") {
+        rjson::toJSON(private$validation_results)
+      } else {
+        NULL
+      }
     }
   ),
   private = list(

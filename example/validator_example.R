@@ -26,4 +26,5 @@ sample_data %>%
   validation_rules() %>%
   validator$add_validations(.)
 
-validator$get_validations()
+validator$get_validations(type = "data.frame")
+validator$get_validations(type = "json")
