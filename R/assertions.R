@@ -55,7 +55,7 @@
 #'
 #' @export
 assert <- function(data, predicate, ...,
-                   success_fun=success_continue, error_fun=error_stop, skip_fun=success_continue,
+                   success_fun=success_continue, error_fun=error_append, skip_fun=success_continue,
                    title = NULL, mark_data_corrupted_on_failure = FALSE, ignore_chain_funs = FALSE) {
   skip_rule <- attr(data, "is_corrupted")
   if (isTRUE(skip_rule))
@@ -185,7 +185,7 @@ assert <- function(data, predicate, ...,
 #' @export
 #'
 assert_rows <- function(data, row_reduction_fn, predicate, ...,
-                        success_fun=success_continue, error_fun=error_stop, skip_fun=success_continue,
+                        success_fun=success_continue, error_fun=error_append, skip_fun=success_continue,
                         title = NULL, mark_data_corrupted_on_failure = FALSE, ignore_chain_funs = FALSE){
   skip_rule <- attr(data, "is_corrupted")
   if (isTRUE(skip_rule))
@@ -311,7 +311,7 @@ assert_rows <- function(data, row_reduction_fn, predicate, ...,
 #'
 #' @export
 insist <- function(data, predicate_generator, ...,
-                   success_fun=success_continue, error_fun=error_stop, skip_fun=success_continue,
+                   success_fun=success_continue, error_fun=error_append, skip_fun=success_continue,
                    title = NULL, mark_data_corrupted_on_failure = FALSE, ignore_chain_funs = FALSE) {
   skip_rule <- attr(data, "is_corrupted")
   if (isTRUE(skip_rule))
@@ -447,7 +447,7 @@ insist <- function(data, predicate_generator, ...,
 #' @export
 #'
 insist_rows <- function(data, row_reduction_fn, predicate_generator, ...,
-                        success_fun=success_continue, error_fun=error_stop, skip_fun=success_continue,
+                        success_fun=success_continue, error_fun=error_append, skip_fun=success_continue,
                         title = NULL, mark_data_corrupted_on_failure = FALSE, ignore_chain_funs = FALSE) {
   skip_rule <- attr(data, "is_corrupted")
   if (isTRUE(skip_rule))
@@ -574,7 +574,7 @@ insist_rows <- function(data, row_reduction_fn, predicate_generator, ...,
 #'
 #' @export
 verify <- function(data, expr,
-                   success_fun=success_continue, error_fun=error_stop, skip_fun=success_continue,
+                   success_fun=success_continue, error_fun=error_append, skip_fun=success_continue,
                    title = NULL, mark_data_corrupted_on_failure = FALSE, ignore_chain_funs = FALSE){
   skip_rule <- attr(data, "is_corrupted")
   if (isTRUE(skip_rule)) return(skip_fun(data))
