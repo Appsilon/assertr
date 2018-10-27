@@ -20,7 +20,9 @@ Imports:
     lazyeval,
     stats,
     utils,
-    rlang (>= 0.1.2)
+    rlang (>= 0.1.2),
+    purrr,
+    R6
 Suggests:
     knitr,
     testthat,
