@@ -28,7 +28,7 @@ Suggests:
     testthat,
     magrittr
 VignetteBuilder: knitr
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 X-schema.org-applicationCategory: Computing Infrastructure
 X-schema.org-keywords: ropensci, defensive, audit, assert, assertions, sanitization, workflow, checking
 X-schema.org-isPartOf: https://ropensci.org
