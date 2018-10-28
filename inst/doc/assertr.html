@@ -332,54 +332,48 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <a class="sourceLine" id="cb7-4" data-line-number="4"><span class="st">  </span><span class="kw">verify</span>(mpg <span class="op">&gt;=</span><span class="st"> </span><span class="dv">0</span>) <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb7-5" data-line-number="5"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb7-6" data-line-number="6"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
-<pre><code>## verification [mpg &gt;= 0] failed! (1 failure)</code></pre>
-<pre><code>## Error: assertr stopped execution</code></pre>
+<pre><code>## # A tibble: 3 x 2
+##     cyl avg.mpg
+##   &lt;dbl&gt;   &lt;dbl&gt;
+## 1     4    26.7
+## 2     6    19.7
+## 3     8    12.4</code></pre>
 <p>If we had done this, we would have caught this data error.</p>
 <p>The <code>verify</code> function takes a data frame (its first argument is provided by the <code>%&gt;%</code> operator), and a logical (boolean) expression. Then, <code>verify</code> evaluates that expression using the scope of the provided data frame. If any of the logical values of the expression’s result are <code>FALSE</code>, <code>verify</code> will raise an error that terminates any further processing of the pipeline.</p>
 <p>We could have also written this assertion using <code>assertr</code>’s <code>assert</code> function…</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1">our.data <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb10-2" data-line-number="2"><span class="st">  </span><span class="kw">assert</span>(<span class="kw">within_bounds</span>(<span class="dv">0</span>,<span class="ot">Inf</span>), mpg) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb10-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb10-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
-<pre><code>## Column 'mpg' violates assertion 'within_bounds(0, Inf)' 1 time
-##   index value
-## 1     5 -18.7</code></pre>
-<pre><code>## Error: assertr stopped execution</code></pre>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1">our.data <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb9-2" data-line-number="2"><span class="st">  </span><span class="kw">assert</span>(<span class="kw">within_bounds</span>(<span class="dv">0</span>,<span class="ot">Inf</span>), mpg) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb9-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb9-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
+<pre><code>## # A tibble: 3 x 2
+##     cyl avg.mpg
+##   &lt;dbl&gt;   &lt;dbl&gt;
+## 1     4    26.7
+## 2     6    19.7
+## 3     8    12.4</code></pre>
 <p>The <code>assert</code> function takes a data frame, a predicate function, and an arbitrary number of columns to apply the predicate function to. The predicate function (a function that returns a logical/boolean value) is then applied to every element of the columns selected, and will raise an error when if it finds violations.</p>
 <p>Internally, the <code>assert</code> function uses <code>dplyr</code>’s <code>select</code> function to extract the columns to test the predicate function on. This allows for complex assertions. Let’s say we wanted to make sure that all values in the dataset are <em>greater</em> than zero (except <code>mpg</code>):</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="kw">library</span>(assertr)</a>
-<a class="sourceLine" id="cb13-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb13-3" data-line-number="3">our.data <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb13-4" data-line-number="4"><span class="st">  </span><span class="kw">assert</span>(<span class="kw">within_bounds</span>(<span class="dv">0</span>,<span class="ot">Inf</span>, <span class="dt">include.lower=</span><span class="ot">FALSE</span>), <span class="op">-</span>mpg) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb13-5" data-line-number="5"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb13-6" data-line-number="6"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
-<pre><code>## Column 'vs' violates assertion 'within_bounds(0, Inf, include.lower = FALSE)' 18 times
-##   index value
-## 1     1     0
-## 2     2     0
-## 3     5     0
-## 4     7     0
-## 5    12     0
-##   [omitted 13 rows]
-## 
-## Column 'am' violates assertion 'within_bounds(0, Inf, include.lower = FALSE)' 19 times
-##   index value
-## 1     4     0
-## 2     5     0
-## 3     6     0
-## 4     7     0
-## 5     8     0
-##   [omitted 14 rows]</code></pre>
-<pre><code>## Error: assertr stopped execution</code></pre>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="kw">library</span>(assertr)</a>
+<a class="sourceLine" id="cb11-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb11-3" data-line-number="3">our.data <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb11-4" data-line-number="4"><span class="st">  </span><span class="kw">assert</span>(<span class="kw">within_bounds</span>(<span class="dv">0</span>,<span class="ot">Inf</span>, <span class="dt">include.lower=</span><span class="ot">FALSE</span>), <span class="op">-</span>mpg) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb11-5" data-line-number="5"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb11-6" data-line-number="6"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
+<pre><code>## # A tibble: 3 x 2
+##     cyl avg.mpg
+##   &lt;dbl&gt;   &lt;dbl&gt;
+## 1     4    26.7
+## 2     6    19.7
+## 3     8    12.4</code></pre>
 </div>
 <div id="verify-vs.assert" class="section level3">
 <h3>verify vs. assert</h3>
 <p>The first noticable difference between <code>verify</code> and <code>assert</code> is that <code>verify</code> takes an expression, and <code>assert</code> takes a predicate and columns to apply it to. This might make the <code>verify</code> function look more elegant–but there’s an important drawback. <code>verify</code> has to evaluate the entire expression first, and <em>then</em> check if there were any violations. Because of this, <code>verify</code> can’t tell you the offending datum.</p>
 <p>One important drawback to <code>assert</code>, and a consequence of its application of the predicate to <em>columns</em>, is that <code>assert</code> can’t confirm assertions about the data structure <em>itself</em>. For example, let’s say we were reading a dataset from disk that we know has more than 100 observations; we could write a check of that assumption like this:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1">dat &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;a-data-file.csv&quot;</span>)</a>
-<a class="sourceLine" id="cb16-2" data-line-number="2">dat <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb16-3" data-line-number="3"><span class="st">  </span><span class="kw">verify</span>(<span class="kw">nrow</span>(.) <span class="op">&gt;</span><span class="st"> </span><span class="dv">100</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb16-4" data-line-number="4"><span class="st">  </span>....</a></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1">dat &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;a-data-file.csv&quot;</span>)</a>
+<a class="sourceLine" id="cb13-2" data-line-number="2">dat <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb13-3" data-line-number="3"><span class="st">  </span><span class="kw">verify</span>(<span class="kw">nrow</span>(.) <span class="op">&gt;</span><span class="st"> </span><span class="dv">100</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb13-4" data-line-number="4"><span class="st">  </span>....</a></code></pre></div>
 <p>This is a powerful advantage over <code>assert</code>… but <code>assert</code> has one more advantage of its own that we heretofore ignored.</p>
 </div>
 <div id="assertrs-predicates" class="section level3">
@@ -392,32 +386,32 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <li><code>is_uniq</code> - that checks to see if each element appears only once</li>
 </ul>
 <p>We’ve already seen <code>within_bounds</code> in action… let’s use the <code>in_set</code> function to make sure that there are only 0s and 1s (automatic and manual, respectively) values in the <code>am</code> column…</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1">our.data <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb17-2" data-line-number="2"><span class="st">  </span><span class="kw">assert</span>(<span class="kw">in_set</span>(<span class="dv">0</span>,<span class="dv">1</span>), am) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb17-3" data-line-number="3"><span class="st">  </span>...</a></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1">our.data <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb14-2" data-line-number="2"><span class="st">  </span><span class="kw">assert</span>(<span class="kw">in_set</span>(<span class="dv">0</span>,<span class="dv">1</span>), am) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb14-3" data-line-number="3"><span class="st">  </span>...</a></code></pre></div>
 <p>If we were reading a dataset that contained a column representing boroughs of New York City (named <code>BORO</code>), we can verify that there are no mis-spelled or otherwise unexpected boroughs like so…</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1">boroughs &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Bronx&quot;</span>, <span class="st">&quot;Manhattan&quot;</span>, <span class="st">&quot;Queens&quot;</span>, <span class="st">&quot;Brooklyn&quot;</span>, <span class="st">&quot;Staten Island&quot;</span>)</a>
-<a class="sourceLine" id="cb18-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb18-3" data-line-number="3"><span class="kw">read.csv</span>(<span class="st">&quot;a-dataset.csv&quot;</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb18-4" data-line-number="4"><span class="st">  </span><span class="kw">assert</span>(<span class="kw">in_set</span>(boroughs), BORO) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb18-5" data-line-number="5"><span class="st">  </span>...</a></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1">boroughs &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Bronx&quot;</span>, <span class="st">&quot;Manhattan&quot;</span>, <span class="st">&quot;Queens&quot;</span>, <span class="st">&quot;Brooklyn&quot;</span>, <span class="st">&quot;Staten Island&quot;</span>)</a>
+<a class="sourceLine" id="cb15-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb15-3" data-line-number="3"><span class="kw">read.csv</span>(<span class="st">&quot;a-dataset.csv&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb15-4" data-line-number="4"><span class="st">  </span><span class="kw">assert</span>(<span class="kw">in_set</span>(boroughs), BORO) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb15-5" data-line-number="5"><span class="st">  </span>...</a></code></pre></div>
 <p>Rad!</p>
 </div>
 <div id="custom-predicates" class="section level3">
 <h3>custom predicates</h3>
 <p>A convenient feature of <code>assertr</code> is that it makes the construction of custom predicate functions easy.</p>
 <p>In order to make a custom predicate, you only have to specify cases where the predicate should return FALSE. Let’s say that a dataset has an ID column (named <code>ID</code>) that we want to check is not an empty string. We can create a predicate like this:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" data-line-number="1">not.empty.p &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="cf">if</span>(x<span class="op">==</span><span class="st">&quot;&quot;</span>) <span class="kw">return</span>(<span class="ot">FALSE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1">not.empty.p &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="cf">if</span>(x<span class="op">==</span><span class="st">&quot;&quot;</span>) <span class="kw">return</span>(<span class="ot">FALSE</span>)</a></code></pre></div>
 <p>and apply it like this:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" data-line-number="1"><span class="kw">read.csv</span>(<span class="st">&quot;another-dataset.csv&quot;</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb20-2" data-line-number="2"><span class="st">  </span><span class="kw">assert</span>(not.empty.p, ID) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb20-3" data-line-number="3"><span class="st">  </span>...</a></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="kw">read.csv</span>(<span class="st">&quot;another-dataset.csv&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb17-2" data-line-number="2"><span class="st">  </span><span class="kw">assert</span>(not.empty.p, ID) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb17-3" data-line-number="3"><span class="st">  </span>...</a></code></pre></div>
 <p>Let’s say that the ID column is always a 7-digit number. We can confirm that all the IDs are 7-digits by defining the following predicate:</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" data-line-number="1">seven.digit.p &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">nchar</span>(x)<span class="op">==</span><span class="dv">7</span></a></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1">seven.digit.p &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">nchar</span>(x)<span class="op">==</span><span class="dv">7</span></a></code></pre></div>
 <p>A powerful consequence of this easy creation of predicates is that the <code>assert</code> function lends itself to use with lambda predicates (unnamed predicates that are only used once). The check above might be better written as</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" data-line-number="1"><span class="kw">read.csv</span>(<span class="st">&quot;another-dataset.csv&quot;</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb22-2" data-line-number="2"><span class="st">  </span><span class="kw">assert</span>(<span class="cf">function</span>(x) <span class="kw">nchar</span>(x)<span class="op">==</span><span class="dv">7</span>, ID) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb22-3" data-line-number="3"><span class="st">  </span>...</a></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" data-line-number="1"><span class="kw">read.csv</span>(<span class="st">&quot;another-dataset.csv&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb19-2" data-line-number="2"><span class="st">  </span><span class="kw">assert</span>(<span class="cf">function</span>(x) <span class="kw">nchar</span>(x)<span class="op">==</span><span class="dv">7</span>, ID) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb19-3" data-line-number="3"><span class="st">  </span>...</a></code></pre></div>
 <p>Neat-o!</p>
 </div>
 <div id="enter-insist-and-predicate-generators" class="section level3">
@@ -428,10 +422,10 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <p>This is all much simpler than it may sound. Hopefully, the examples will clear up any confusion.</p>
 <p>The primary use case for <code>insist</code> is in conjunction with the <code>within_n_sds</code> or <code>within_n_mads</code> predicate generator.</p>
 <p>Suppose we wanted to check that every <code>mpg</code> value in the <code>mtcars</code> data set was within 3 standard deviations of the mean before finding the average miles per gallon for each number of engine cylinders. We could write something like this:</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" data-line-number="1">mtcars <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb23-2" data-line-number="2"><span class="st">  </span><span class="kw">insist</span>(<span class="kw">within_n_sds</span>(<span class="dv">3</span>), mpg) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb23-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb23-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" data-line-number="1">mtcars <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb20-2" data-line-number="2"><span class="st">  </span><span class="kw">insist</span>(<span class="kw">within_n_sds</span>(<span class="dv">3</span>), mpg) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb20-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb20-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
 <pre><code>## # A tibble: 3 x 2
 ##     cyl avg.mpg
 ##   &lt;dbl&gt;   &lt;dbl&gt;
@@ -439,22 +433,23 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 ## 2     6    19.7
 ## 3     8    15.1</code></pre>
 <p>Notice what happens when we drop that z-score to 2 standard deviations from the mean</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" data-line-number="1">mtcars <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb25-2" data-line-number="2"><span class="st">  </span><span class="kw">insist</span>(<span class="kw">within_n_sds</span>(<span class="dv">2</span>), mpg) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb25-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb25-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
-<pre><code>## Column 'mpg' violates assertion 'within_n_sds(2)' 2 times
-##   index value
-## 1    18  32.4
-## 2    20  33.9</code></pre>
-<pre><code>## Error: assertr stopped execution</code></pre>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" data-line-number="1">mtcars <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb22-2" data-line-number="2"><span class="st">  </span><span class="kw">insist</span>(<span class="kw">within_n_sds</span>(<span class="dv">2</span>), mpg) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb22-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb22-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
+<pre><code>## # A tibble: 3 x 2
+##     cyl avg.mpg
+##   &lt;dbl&gt;   &lt;dbl&gt;
+## 1     4    26.7
+## 2     6    19.7
+## 3     8    15.1</code></pre>
 <p>Execution of the pipeline was halted. But now we know exactly which data point violated the predicate that <code>within_n_sds(2)(mtcars$mpg)</code> returned.</p>
 <p>Now that’s an efficient car!</p>
 <p>After the predicate generator, <code>insist</code> takes an arbitrary number of columns just like <code>assert</code> using the syntax of <code>dplyr</code>’s <code>select</code> function. If you wanted to check that everything in mtcars is within 10 standard deviations of the mean (of each column vector), you can do so like this:</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" data-line-number="1">mtcars <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb28-2" data-line-number="2"><span class="st">  </span><span class="kw">insist</span>(<span class="kw">within_n_sds</span>(<span class="dv">10</span>), mpg<span class="op">:</span>carb) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb28-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb28-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" data-line-number="1">mtcars <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb24-2" data-line-number="2"><span class="st">  </span><span class="kw">insist</span>(<span class="kw">within_n_sds</span>(<span class="dv">10</span>), mpg<span class="op">:</span>carb) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb24-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb24-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
 <pre><code>## # A tibble: 3 x 2
 ##     cyl avg.mpg
 ##   &lt;dbl&gt;   &lt;dbl&gt;
@@ -465,25 +460,25 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <p>I chose to use <code>within_n_sds</code> in this example because people are familiar z-scores. However, for most practical purposes, the related predicate generator <code>within_n_mads</code> is more useful.</p>
 <p>The problem with <code>within_n_sds</code> is the mean and standard deviation are so heavily influenced by outliers, their very presence will compromise attempts to identify them using these statistics. In contrast with <code>within_n_sds</code>, <code>within_n_mads</code> uses the robust statistics, median and median absolute deviation, to identify potentially erroneous data points.</p>
 <p>For example, the vector <code>&lt;7.4, 7.1, 7.2, 72.1&gt;</code> almost certainly has an erroneous data point, but <code>within_n_sds(2)</code> will fail to detect it.</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" data-line-number="1">example.vector &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="fl">7.4</span>, <span class="fl">7.1</span>, <span class="fl">7.2</span>, <span class="fl">72.1</span>)</a>
-<a class="sourceLine" id="cb30-2" data-line-number="2"><span class="kw">within_n_sds</span>(<span class="dv">2</span>)(example.vector)(example.vector)</a></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" data-line-number="1">example.vector &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="fl">7.4</span>, <span class="fl">7.1</span>, <span class="fl">7.2</span>, <span class="fl">72.1</span>)</a>
+<a class="sourceLine" id="cb26-2" data-line-number="2"><span class="kw">within_n_sds</span>(<span class="dv">2</span>)(example.vector)(example.vector)</a></code></pre></div>
 <pre><code>## [1] TRUE TRUE TRUE TRUE</code></pre>
 <p>whereas <code>within_n_mads</code> will detect it at even lower levels of power….</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" data-line-number="1">example.vector &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="fl">7.4</span>, <span class="fl">7.1</span>, <span class="fl">7.2</span>, <span class="fl">72.1</span>)</a>
-<a class="sourceLine" id="cb32-2" data-line-number="2"><span class="kw">within_n_mads</span>(<span class="dv">2</span>)(example.vector)(example.vector)</a></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" data-line-number="1">example.vector &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="fl">7.4</span>, <span class="fl">7.1</span>, <span class="fl">7.2</span>, <span class="fl">72.1</span>)</a>
+<a class="sourceLine" id="cb28-2" data-line-number="2"><span class="kw">within_n_mads</span>(<span class="dv">2</span>)(example.vector)(example.vector)</a></code></pre></div>
 <pre><code>## [1]  TRUE  TRUE  TRUE FALSE</code></pre>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb34-1" data-line-number="1"><span class="kw">within_n_mads</span>(<span class="dv">1</span>)(example.vector)(example.vector)</a></code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" data-line-number="1"><span class="kw">within_n_mads</span>(<span class="dv">1</span>)(example.vector)(example.vector)</a></code></pre></div>
 <pre><code>## [1]  TRUE  TRUE  TRUE FALSE</code></pre>
 <p>Tubular!</p>
 </div>
 <div id="row-wise-assertions-and-row-reduction-functions" class="section level3">
 <h3>row-wise assertions and row reduction functions</h3>
 <p>As cool as it’s been so far, this still isn’t enough to constitute a complete grammar of data integrity checking. To see why, check out the following small example data set:</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" data-line-number="1">example.data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">x=</span><span class="kw">c</span>(<span class="dv">8</span>, <span class="dv">9</span>, <span class="dv">6</span>, <span class="dv">5</span>, <span class="dv">9</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">7</span>,</a>
-<a class="sourceLine" id="cb36-2" data-line-number="2">                             <span class="dv">8</span>, <span class="dv">9</span>, <span class="dv">6</span>, <span class="dv">5</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">7</span>),</a>
-<a class="sourceLine" id="cb36-3" data-line-number="3">                         <span class="dt">y=</span><span class="kw">c</span>(<span class="dv">82</span>, <span class="dv">91</span>, <span class="dv">61</span>, <span class="dv">49</span>, <span class="dv">40</span>, <span class="dv">49</span>, <span class="dv">57</span>,</a>
-<a class="sourceLine" id="cb36-4" data-line-number="4">                             <span class="dv">74</span>, <span class="dv">78</span>, <span class="dv">90</span>, <span class="dv">61</span>, <span class="dv">49</span>, <span class="dv">51</span>, <span class="dv">62</span>, <span class="dv">68</span>))</a>
-<a class="sourceLine" id="cb36-5" data-line-number="5">(example.data)</a></code></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" data-line-number="1">example.data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">x=</span><span class="kw">c</span>(<span class="dv">8</span>, <span class="dv">9</span>, <span class="dv">6</span>, <span class="dv">5</span>, <span class="dv">9</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">7</span>,</a>
+<a class="sourceLine" id="cb32-2" data-line-number="2">                             <span class="dv">8</span>, <span class="dv">9</span>, <span class="dv">6</span>, <span class="dv">5</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">7</span>),</a>
+<a class="sourceLine" id="cb32-3" data-line-number="3">                         <span class="dt">y=</span><span class="kw">c</span>(<span class="dv">82</span>, <span class="dv">91</span>, <span class="dv">61</span>, <span class="dv">49</span>, <span class="dv">40</span>, <span class="dv">49</span>, <span class="dv">57</span>,</a>
+<a class="sourceLine" id="cb32-4" data-line-number="4">                             <span class="dv">74</span>, <span class="dv">78</span>, <span class="dv">90</span>, <span class="dv">61</span>, <span class="dv">49</span>, <span class="dv">51</span>, <span class="dv">62</span>, <span class="dv">68</span>))</a>
+<a class="sourceLine" id="cb32-5" data-line-number="5">(example.data)</a></code></pre></div>
 <pre><code>##    x  y
 ## 1  8 82
 ## 2  9 91
@@ -502,29 +497,29 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 ## 15 7 68</code></pre>
 <p>Can you spot the brazen outlier? You’re certainly not going to find it by checking the distribution of each <em>column</em>! All elements from both columns are within 2 standard deviations of their respective means.</p>
 <p>Unless you have a <em>really</em> good eye, the only way you’re going to catch this mistake is by plotting the data set.</p>
-<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb38-1" data-line-number="1"><span class="kw">plot</span>(example.data<span class="op">$</span>x, example.data<span class="op">$</span>y, <span class="dt">xlab=</span><span class="st">&quot;&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb34-1" data-line-number="1"><span class="kw">plot</span>(example.data<span class="op">$</span>x, example.data<span class="op">$</span>y, <span class="dt">xlab=</span><span class="st">&quot;&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;&quot;</span>)</a></code></pre></div>
 <p><img src="data:image/png;base64,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" /><!-- --></p>
 <p>Ok, so all the <code>y</code>s are roughly 10 times the <code>x</code>s except the outlying data point.</p>
 <p>The problem having to plot data sets to catch anomalies is that it is <em>really</em> hard to visualize 4-dimensions at once, and it is near impossible with high-dimensional data.</p>
 <p>There’s no way of catching this anomaly by looking at each individual column separately; the only way to catch it is to view each row as a complete observation and compare it to the rest.</p>
 <p>To this end, <code>assertr</code> provides two functions that take a data frame, and reduce each row into a single value. We’ll call them <em>row reduction functions</em>.</p>
 <p>The first one we’ll look at is called <code>maha_dist</code>. It computes the average mahalanobis distance (kind of like multivariate z-scoring for outlier detection) of each row from the whole data set. The big idea is that in the resultant vector, big/distant values are potential anomalous entries. Let’s look at the distribution of mahalanobis distances for this data set…</p>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb39-1" data-line-number="1"><span class="kw">maha_dist</span>(example.data)</a></code></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb35-1" data-line-number="1"><span class="kw">maha_dist</span>(example.data)</a></code></pre></div>
 <pre><code>##  [1]  1.28106379  3.10992407  0.25081851  1.35993969 12.81898913
 ##  [6]  1.35993969  0.26181283  0.47714597  0.87804987  2.95741956
 ## [11]  0.25081851  1.35993969  1.29208587  0.28235776  0.05969507</code></pre>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" data-line-number="1"><span class="kw">maha_dist</span>(example.data) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">hist</span>(<span class="dt">main=</span><span class="st">&quot;&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" data-line-number="1"><span class="kw">maha_dist</span>(example.data) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">hist</span>(<span class="dt">main=</span><span class="st">&quot;&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;&quot;</span>)</a></code></pre></div>
 <p><img src="data:image/png;base64,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" /><!-- --></p>
 <p>There’s no question here as to whether there’s an anomalous entry! But how do you check for this sort of thing using <code>assertr</code> constructs?</p>
 <p>Well, <code>maha_dist</code> will typically be used with the <code>insist_rows</code> function. <code>insist_rows</code> takes a data frame, a row reduction function, a predicate-generating function, and an arbitrary number of columns to apply the predicate function to. The row reduction function (<code>maha_dist</code> in this case) is applied to the data frame, and returns a value for each row. The predicate-generating function is then applied to the vector returned from the row reduction function and the resultant predicate is applied to each element of that vector. It will raise an error if it finds any violations.</p>
 <p>As always, this undoubtedly sounds far more confusing than it really is. Here’s an example of it in use</p>
-<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" data-line-number="1">example.data <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb42-2" data-line-number="2"><span class="st">  </span><span class="kw">insist_rows</span>(maha_dist, <span class="kw">within_n_mads</span>(<span class="dv">3</span>), dplyr<span class="op">::</span><span class="kw">everything</span>())</a></code></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb38-1" data-line-number="1">example.data <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb38-2" data-line-number="2"><span class="st">  </span><span class="kw">insist_rows</span>(maha_dist, <span class="kw">within_n_mads</span>(<span class="dv">3</span>), dplyr<span class="op">::</span><span class="kw">everything</span>())</a></code></pre></div>
 <pre><code>## Error in make.assertr.assert_rows.error(name.of.row.redux.fn, name.of.predicate.generator, : argument &quot;validation_id&quot; is missing, with no default</code></pre>
 <p>Check that out! To be clear, this function is running the supplied data frame through the <code>maha_dist</code> function which returns a value for each row corresponding to its mahalanobis distance. (The whole data frame is used because we used the <code>everything()</code> selection function from the <code>dplyr</code> package.) Then, <code>within_n_mads(3)</code> computes on that vector and returns a bounds checking predicate. The bounds checking predicate checks to see that all mahalanobis distances are within 3 median absolute deviations of each other. They are not, and the pipeline errors out.</p>
 <p>This is probably the most powerful construct in <code>assertr</code>–it can find a whole lot of nasty errors that would be very difficult to check for by hand.</p>
 <p>Part of what makes it so powerful is how flexible <code>maha_dist</code> is. We only used it, so far, on a data frame of numerics, but it can handle all sorts of data frames. To really see it shine, let’s use it on the iris data set, that contains a categorical variable in its right-most column…</p>
-<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb44-1" data-line-number="1"><span class="kw">head</span>(iris)</a></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb40-1" data-line-number="1"><span class="kw">head</span>(iris)</a></code></pre></div>
 <pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
 ## 1          5.1         3.5          1.4         0.2  setosa
 ## 2          4.9         3.0          1.4         0.2  setosa
@@ -532,29 +527,29 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 ## 4          4.6         3.1          1.5         0.2  setosa
 ## 5          5.0         3.6          1.4         0.2  setosa
 ## 6          5.4         3.9          1.7         0.4  setosa</code></pre>
-<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb46-1" data-line-number="1">iris <span class="op">%&gt;%</span><span class="st"> </span>maha_dist <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">hist</span>(<span class="dt">main=</span><span class="st">&quot;&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" data-line-number="1">iris <span class="op">%&gt;%</span><span class="st"> </span>maha_dist <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">hist</span>(<span class="dt">main=</span><span class="st">&quot;&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;&quot;</span>)</a></code></pre></div>
 <p><img src="data:image/png;base64,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" /><!-- --></p>
 <p>Looks ok, but what happens when we accidentally enter a row as a different species…</p>
-<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb47-1" data-line-number="1">mistake &lt;-<span class="st"> </span>iris</a>
-<a class="sourceLine" id="cb47-2" data-line-number="2">(mistake[<span class="dv">149</span>,<span class="dv">5</span>])</a></code></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb43-1" data-line-number="1">mistake &lt;-<span class="st"> </span>iris</a>
+<a class="sourceLine" id="cb43-2" data-line-number="2">(mistake[<span class="dv">149</span>,<span class="dv">5</span>])</a></code></pre></div>
 <pre><code>## [1] virginica
 ## Levels: setosa versicolor virginica</code></pre>
-<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb49-1" data-line-number="1">mistake[<span class="dv">149</span>,<span class="dv">5</span>] &lt;-<span class="st"> &quot;setosa&quot;</span></a>
-<a class="sourceLine" id="cb49-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb49-3" data-line-number="3">mistake <span class="op">%&gt;%</span><span class="st"> </span>maha_dist <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">hist</span>(<span class="dt">main=</span><span class="st">&quot;&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb45-1" data-line-number="1">mistake[<span class="dv">149</span>,<span class="dv">5</span>] &lt;-<span class="st"> &quot;setosa&quot;</span></a>
+<a class="sourceLine" id="cb45-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb45-3" data-line-number="3">mistake <span class="op">%&gt;%</span><span class="st"> </span>maha_dist <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">hist</span>(<span class="dt">main=</span><span class="st">&quot;&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;&quot;</span>)</a></code></pre></div>
 <p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAACxFBMVEUAAAABAQECAgIDAwMEBAQFBQUGBgYHBwcICAgJCQkKCgoLCwsMDAwNDQ0ODg4PDw8QEBARERESEhITExMUFBQXFxcYGBgZGRkaGhobGxscHBwdHR0eHh4fHx8gICAhISEiIiIjIyMkJCQlJSUmJiYnJycoKCgpKSkqKiorKyssLCwtLS0uLi4vLy8wMDAxMTEzMzM0NDQ1NTU2NjY3Nzc4ODg5OTk6Ojo7Ozs9PT0+Pj4/Pz9AQEBCQkJDQ0NERERHR0dISEhJSUlKSkpLS0tMTExNTU1OTk5PT09QUFBRUVFSUlJTU1NUVFRVVVVWVlZXV1dYWFhZWVlaWlpcXFxdXV1eXl5fX19gYGBhYWFiYmJjY2NkZGRlZWVmZmZnZ2doaGhpaWlqampra2tsbGxtbW1ubm5vb29wcHBxcXFycnJzc3N0dHR1dXV2dnZ3d3d4eHh5eXl6enp7e3t8fHx9fX1+fn5/f3+AgICBgYGCgoKDg4OEhISFhYWGhoaHh4eIiIiJiYmKioqLi4uMjIyNjY2Ojo6Pj4+QkJCRkZGSkpKTk5OUlJSVlZWWlpaXl5eYmJiZmZmampqcnJydnZ2enp6fn5+goKChoaGioqKjo6OkpKSmpqanp6eoqKipqamqqqqsrKytra2urq6vr6+wsLCxsbGysrKzs7O0tLS1tbW2tra3t7e4uLi5ubm6urq7u7u8vLy+vr6/v7/AwMDCwsLDw8PExMTFxcXGxsbHx8fIyMjJycnKysrLy8vMzMzNzc3Ozs7Pz8/Q0NDR0dHT09PU1NTW1tbX19fY2NjZ2dna2trb29vc3Nzd3d3f39/g4ODh4eHi4uLj4+Pn5+fo6Ojp6enq6urr6+vs7Ozt7e3u7u7v7+/w8PDx8fHz8/P09PT19fX29vb39/f4+Pj5+fn6+vr7+/v8/Pz9/f3+/v7///8jNO2hAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAJhElEQVR4nO2d/XsU1RmGTxZBEkKSjSEtSFoaIXwEC1FTBDUa29JKKliMqBhCgYIBosGAgBAjpiJgW0mKqIVCMQLSxCixfvFRkEpb+SoGsBSkSAgJIfNPdGeTJROds8+c3Vnidfa5f5jdl/d9zxzuK5PdzJzZFQYJiujuCXzboSAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBHBF0MGJAW79pxnXTbTwQL0bu+g2XBF0dkuAwR+YcenkLZ088LQbu+g2XD7Esneb29JnLf+0jIIsUBCAggAUBKAgAAUBKAhAQQAKAlCQYbSevixPRr2gTwtSPcKTOvWgJB/tgj6MzVhQualy0c2xu+wLNBb0/AkH1WPzWv2PbdPusC/QWFBizLiqs6g64c2OJx8n2hdoLOjStsl9eo7f3Bi0etQTHU9+M9q+QGNBPhq35PWOf+jtIC9S68WD1Z8cPbC9wPO6fYHegowjFSNF35gBf5GXb8gUJpkbJXmdBe1fOFz0m/7u5ePTPF8EaTixp3bPN36f/+/LDm7RV9AAMbDogyvms6/E+6Dp2Lmu8XveANdtM2MtBT21L/Cs9Zj8t9DW+35Rb9wvYgqa7fM6H2Kn1n1lnHq+IWj1JjHmrrjpQ954OWGlfYHGgvZ4488YJ1IT9gar/uFsw3hG+N5Fr8i0L9BY0Nh7Lvi2LZPuDFYdV2sYe0WTYbwbZ1+gsaD4Gv/DzoRg1ekVhvGKOGwY69LtCzQWdNNa/0OV5H/eTllscWnCLbkNnwx63L5AY0GLvNWtxpUdNxQHq75c0q//i43DhBh9xr5AY0GtUz3XpfYSeZdwT/OOOlmVxoIM49DrZev+HuZwWgtyA40FnZkxJttkZljDaSwoL/VXxSaLwxpOY0EJR9wYTmNBwyV/fqqhsaDlv3VjOI0Fbcq6e+lqk7CG01jQgABhDaexIHfQW9ClY2EPp7OgtTfGCGPSC6EMcqoqwCD/6WwtBa2PKdwsjFU91oYwyL8KA6TWmbGWgobNNs74gsUjwhpO40MsrtYv6B3JuVSHaCxo1GK/oIrMsIbTWNArPZftFier4iXXcxyisSBjdbIQ4vqStrCG01mQcWHvn987HeZwWgtyA40F/bSDJ8MaTmNBj/h4+N6kIevDGk5jQe2cv+sPYQ2nvSDjryPDGk5/QTXxqCNaV9pv9LNmYNDVHdG80r63n7gffRasOppX2jsimlfaOyKaV9qndHKTtDqaV9q/5kkrXlWSnrimsrJKWh3KSvuJ3kGd/CC8t1ndwFVBv8xp8W1bc2cELQ9hpX1O1r87KZ0f5nyvOVcF9av2P2zrDxrsVtrvGh2g71tm3FXQWEvwwvzQp9o9XBV0Y/sl1Ze+46Bp29fOijTtD5Dpf/nXUtDMxB2+bU3SFCdN0o8EsjvENBF08V6RPCJZZH0ZrDq/HZGTn29foLEgw9i9sqi8NvgZ19tFmrkKTQzNzrYv0FqQg0vPl4u9W40oPcQcXnre7p3bEp2CnF56Pp51W0NUCnJ86bl5VnJUClK49FxddFiW0lhQxC496yIoYpeedREUsUvPmghq/rwpQpeeNRH0mdjgxnD6CjJyfuzGcBoL+lNG1sIXI7GQXBdBEVtIroWg+v+4NJyugsQbvk1Z0GuGztBakH8TEi0HAqdcR1KQHR9ePWnfZ7sZU5AUHmIACgJoK6hvSkqKf5OSEtZwugoqshDWcLoKcg0KAlAQgIIAFASgIAAFASgIQEEAJGh62t0W/ujuziPCNRY0fvDOTuaE92lX1wZ1Qao3s3QVlGUJfq+hoBBuZokqQaHczBJVgkK5mUUuaOHwQgs1SjNR4VKRdT/PqTW7cjPL0ZIA/Xeacem4kk6+N8ASpKdagqE9vJ3EZloyM+63BLPyLMHs+yzB4z+zBHPHW4J5P7GOFmPZT5LiCS81QZKbWU6uCPCY/+PwD66wMG+uJSieYwlKfm0JnpphCRZNtwRPF1qCJY9ZgmcetQTLrUHZw5agfIp1PorvLdQEwZtZ9EPxVQzdzKIfyu+DbL824mvUlFVJKF8iy1QslGVWPSnLvDRflnm5SJapXBRhQU546NZCCdkjZZk7B8syuWmyzM/7yTKTkmSZKX2+BYK6vMx3Qf7H6quPyDJvjZdlPh4jyxwaIsv8N6KvYg6hIAAFASgIQEEACgJQEICCAIsrZJk1JbLMxgJZ5u0JsszecbLMseGyzLlUWcaeiAhqvCjLNF2QZVrOyzKt52SZNvnXekq+OSZoxpaICNIJCgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBIiAoFdHJ97xkfPy5mcz4oZVtKg2Xr49X3Fn+3K9369QnqD7gjaKeW9OiP3Ucf2C3uV1S6+fo9pYLPLVdrYv/sHqJ2JWq+7HfUEjJxtGa8Y0p+VXYkt922U9m9Qat3vT8tV2NuEe32Z+nuoEXRd0QpifWLnAyccx+jmZYf60bxANSo3HvVuz85V2dr7H5pAm6LqgPWK/b1vpaVVpujgu/YpKY3PWXMMUpNDzD7ElNyl9SbPqBF0XVCuO+rabhMrnyBzI6rtLqXHWbS1+QQo974gbltaU95mpOsEI/AQd8G2rPC2OO84+6pnwuVJjdXKD0fET5LjnfWF+wN9znkbFCUbgd5B56/wi59cOjnx3xN8UG4tEO9sUeo4K88vz6sQhxQm6/yo2osAw2m6e6rS8bXhuk2rj4XofQ3PqTyv0tA5c7tsu6d2iOEH3BW3wrNxVGCtbaf4NPhJz15lcVG00DzGVnt/1Wlq3tFeZ6gQj8E76tVEJ4yTrzG2o6jhcvlBt9AtS6akc1Sezsk11gvxbDEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIMD/AdBP8+J0NpjUAAAAAElFTkSuQmCC" /><!-- --></p>
-<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb50-1" data-line-number="1">mistake <span class="op">%&gt;%</span><span class="st"> </span>maha_dist <span class="op">%&gt;%</span><span class="st"> </span>which.max</a></code></pre></div>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb46-1" data-line-number="1">mistake <span class="op">%&gt;%</span><span class="st"> </span>maha_dist <span class="op">%&gt;%</span><span class="st"> </span>which.max</a></code></pre></div>
 <pre><code>## [1] 149</code></pre>
 <p>Look at that! This mistake can easily be picked up by any reasonable bounds checker…</p>
-<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb52-1" data-line-number="1">mistake <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">insist_rows</span>(maha_dist, <span class="kw">within_n_mads</span>(<span class="dv">7</span>), dplyr<span class="op">::</span><span class="kw">everything</span>())</a></code></pre></div>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb48-1" data-line-number="1">mistake <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">insist_rows</span>(maha_dist, <span class="kw">within_n_mads</span>(<span class="dv">7</span>), dplyr<span class="op">::</span><span class="kw">everything</span>())</a></code></pre></div>
 <pre><code>## Error in make.assertr.assert_rows.error(name.of.row.redux.fn, name.of.predicate.generator, : argument &quot;validation_id&quot; is missing, with no default</code></pre>
 <p><code>insist</code> and <code>insist_rows</code> are both similar in that they both take predicate generators and not actual predicates. What makes <code>insist_rows</code> different is its usage of a row-reduce data frame.</p>
 <p><code>assert</code> has a row-oriented counterpart, too; it’s called <code>assert_rows</code>. <code>insist</code> is to <code>assert</code> as <code>insist_rows</code> is to <code>assert_rows</code>.</p>
 <p><code>assert_rows</code> works the same as <code>insist_rows</code>, except that instead of using a predicate generator on the row-reduced data frame, it uses a regular-old predicate.</p>
 <p>For an example of a <code>assert_rows</code> use case, let’s say that we got a data set (<code>another-dataset.csv</code>) from the web and we don’t want to continue processing the data set if any row contains more than two missing values (NAs). You can use the row reduction function <code>num_row_NAs</code> to reduce all the rows into the number of NAs they contain. Then, a simple bounds checker will suffice for ensuring that no element is higher than 2…</p>
-<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb54-1" data-line-number="1"><span class="kw">read.csv</span>(<span class="st">&quot;another-dataset.csv&quot;</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb54-2" data-line-number="2"><span class="st">  </span><span class="kw">assert_rows</span>(num_row_NAs, <span class="kw">within_bounds</span>(<span class="dv">0</span>,<span class="dv">2</span>), dplyr<span class="op">::</span><span class="kw">everything</span>()) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb54-3" data-line-number="3"><span class="st">  </span>...</a></code></pre></div>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb50-1" data-line-number="1"><span class="kw">read.csv</span>(<span class="st">&quot;another-dataset.csv&quot;</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb50-2" data-line-number="2"><span class="st">  </span><span class="kw">assert_rows</span>(num_row_NAs, <span class="kw">within_bounds</span>(<span class="dv">0</span>,<span class="dv">2</span>), dplyr<span class="op">::</span><span class="kw">everything</span>()) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb50-3" data-line-number="3"><span class="st">  </span>...</a></code></pre></div>
 <p><code>assert_rows</code> can be used for anomaly detection as well. A future version of <code>assertr</code> may contain a cosine distance row reduction function. Since all cosine distances are constained from -1 to 1, it is easy to use a non-dynamic predicate to disallow certain values.</p>
 </div>
 <div id="success-error-and-skip-functions" class="section level3">
@@ -577,19 +572,169 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </ul>
 <p>The <code>skip_fun</code> parameter takes a function that takes the data passed to the assertion function as a parameter. When some of obligated data assertion fails, we are not able to perform following checks. Corrupted data is not validated and the function set an action about what should be done during current assertion. You can use here all of above methods. The default one is <code>success_continue</code> what means that thw whole data is passed to another rule.</p>
 <p>See below example when one of requires column is missing:</p>
-<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb55-1" data-line-number="1">mistake &lt;-<span class="st"> </span>iris</a>
-<a class="sourceLine" id="cb55-2" data-line-number="2">mistake<span class="op">$</span>Species &lt;-<span class="st"> </span><span class="ot">NULL</span></a>
-<a class="sourceLine" id="cb55-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb55-4" data-line-number="4">mistake <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb55-5" data-line-number="5"><span class="st">  </span><span class="kw">verify</span>(<span class="st">&quot;Species&quot;</span> <span class="op">%in%</span><span class="st"> </span><span class="kw">names</span>(.)) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb55-6" data-line-number="6"><span class="st">  </span><span class="kw">verify</span>(<span class="kw">in_set</span>(<span class="st">&quot;setosa&quot;</span>, <span class="st">&quot;versicolor&quot;</span>, <span class="st">&quot;virginica&quot;</span>), Species)</a></code></pre></div>
-<pre><code>## verification [&quot;Species&quot; %in% names(.)] failed! (1 failure)</code></pre>
-<pre><code>## Error: assertr stopped execution</code></pre>
-<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb58-1" data-line-number="1">mistake <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb58-2" data-line-number="2"><span class="st">  </span><span class="kw">verify</span>(<span class="st">&quot;Species&quot;</span> <span class="op">%in%</span><span class="st"> </span><span class="kw">names</span>(.), <span class="dt">mark_data_corrupted_on_failure =</span> <span class="ot">TRUE</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb58-3" data-line-number="3"><span class="st">  </span><span class="kw">verify</span>(<span class="kw">in_set</span>(<span class="st">&quot;setosa&quot;</span>, <span class="st">&quot;versicolor&quot;</span>, <span class="st">&quot;virginica&quot;</span>), Species)</a></code></pre></div>
-<pre><code>## verification [&quot;Species&quot; %in% names(.)] failed! (1 failure)</code></pre>
-<pre><code>## Error: assertr stopped execution</code></pre>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb51-1" data-line-number="1">mistake &lt;-<span class="st"> </span>iris</a>
+<a class="sourceLine" id="cb51-2" data-line-number="2">mistake<span class="op">$</span>Species &lt;-<span class="st"> </span><span class="ot">NULL</span></a>
+<a class="sourceLine" id="cb51-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb51-4" data-line-number="4">mistake <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb51-5" data-line-number="5"><span class="st">  </span><span class="kw">verify</span>(<span class="st">&quot;Species&quot;</span> <span class="op">%in%</span><span class="st"> </span><span class="kw">names</span>(.)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb51-6" data-line-number="6"><span class="st">  </span><span class="kw">verify</span>(<span class="kw">in_set</span>(<span class="st">&quot;setosa&quot;</span>, <span class="st">&quot;versicolor&quot;</span>, <span class="st">&quot;virginica&quot;</span>), Species)</a></code></pre></div>
+<pre><code>## Warning in all(logical.results): coercing argument of type 'closure' to
+## logical</code></pre>
+<pre><code>## Error in verify(., in_set(&quot;setosa&quot;, &quot;versicolor&quot;, &quot;virginica&quot;), Species): cannot coerce type 'closure' to vector of type 'logical'</code></pre>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb54-1" data-line-number="1">mistake <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb54-2" data-line-number="2"><span class="st">  </span><span class="kw">verify</span>(<span class="st">&quot;Species&quot;</span> <span class="op">%in%</span><span class="st"> </span><span class="kw">names</span>(.), <span class="dt">mark_data_corrupted_on_failure =</span> <span class="ot">TRUE</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb54-3" data-line-number="3"><span class="st">  </span><span class="kw">verify</span>(<span class="kw">in_set</span>(<span class="st">&quot;setosa&quot;</span>, <span class="st">&quot;versicolor&quot;</span>, <span class="st">&quot;virginica&quot;</span>), Species)</a></code></pre></div>
+<pre><code>##     Sepal.Length Sepal.Width Petal.Length Petal.Width
+## 1            5.1         3.5          1.4         0.2
+## 2            4.9         3.0          1.4         0.2
+## 3            4.7         3.2          1.3         0.2
+## 4            4.6         3.1          1.5         0.2
+## 5            5.0         3.6          1.4         0.2
+## 6            5.4         3.9          1.7         0.4
+## 7            4.6         3.4          1.4         0.3
+## 8            5.0         3.4          1.5         0.2
+## 9            4.4         2.9          1.4         0.2
+## 10           4.9         3.1          1.5         0.1
+## 11           5.4         3.7          1.5         0.2
+## 12           4.8         3.4          1.6         0.2
+## 13           4.8         3.0          1.4         0.1
+## 14           4.3         3.0          1.1         0.1
+## 15           5.8         4.0          1.2         0.2
+## 16           5.7         4.4          1.5         0.4
+## 17           5.4         3.9          1.3         0.4
+## 18           5.1         3.5          1.4         0.3
+## 19           5.7         3.8          1.7         0.3
+## 20           5.1         3.8          1.5         0.3
+## 21           5.4         3.4          1.7         0.2
+## 22           5.1         3.7          1.5         0.4
+## 23           4.6         3.6          1.0         0.2
+## 24           5.1         3.3          1.7         0.5
+## 25           4.8         3.4          1.9         0.2
+## 26           5.0         3.0          1.6         0.2
+## 27           5.0         3.4          1.6         0.4
+## 28           5.2         3.5          1.5         0.2
+## 29           5.2         3.4          1.4         0.2
+## 30           4.7         3.2          1.6         0.2
+## 31           4.8         3.1          1.6         0.2
+## 32           5.4         3.4          1.5         0.4
+## 33           5.2         4.1          1.5         0.1
+## 34           5.5         4.2          1.4         0.2
+## 35           4.9         3.1          1.5         0.2
+## 36           5.0         3.2          1.2         0.2
+## 37           5.5         3.5          1.3         0.2
+## 38           4.9         3.6          1.4         0.1
+## 39           4.4         3.0          1.3         0.2
+## 40           5.1         3.4          1.5         0.2
+## 41           5.0         3.5          1.3         0.3
+## 42           4.5         2.3          1.3         0.3
+## 43           4.4         3.2          1.3         0.2
+## 44           5.0         3.5          1.6         0.6
+## 45           5.1         3.8          1.9         0.4
+## 46           4.8         3.0          1.4         0.3
+## 47           5.1         3.8          1.6         0.2
+## 48           4.6         3.2          1.4         0.2
+## 49           5.3         3.7          1.5         0.2
+## 50           5.0         3.3          1.4         0.2
+## 51           7.0         3.2          4.7         1.4
+## 52           6.4         3.2          4.5         1.5
+## 53           6.9         3.1          4.9         1.5
+## 54           5.5         2.3          4.0         1.3
+## 55           6.5         2.8          4.6         1.5
+## 56           5.7         2.8          4.5         1.3
+## 57           6.3         3.3          4.7         1.6
+## 58           4.9         2.4          3.3         1.0
+## 59           6.6         2.9          4.6         1.3
+## 60           5.2         2.7          3.9         1.4
+## 61           5.0         2.0          3.5         1.0
+## 62           5.9         3.0          4.2         1.5
+## 63           6.0         2.2          4.0         1.0
+## 64           6.1         2.9          4.7         1.4
+## 65           5.6         2.9          3.6         1.3
+## 66           6.7         3.1          4.4         1.4
+## 67           5.6         3.0          4.5         1.5
+## 68           5.8         2.7          4.1         1.0
+## 69           6.2         2.2          4.5         1.5
+## 70           5.6         2.5          3.9         1.1
+## 71           5.9         3.2          4.8         1.8
+## 72           6.1         2.8          4.0         1.3
+## 73           6.3         2.5          4.9         1.5
+## 74           6.1         2.8          4.7         1.2
+## 75           6.4         2.9          4.3         1.3
+## 76           6.6         3.0          4.4         1.4
+## 77           6.8         2.8          4.8         1.4
+## 78           6.7         3.0          5.0         1.7
+## 79           6.0         2.9          4.5         1.5
+## 80           5.7         2.6          3.5         1.0
+## 81           5.5         2.4          3.8         1.1
+## 82           5.5         2.4          3.7         1.0
+## 83           5.8         2.7          3.9         1.2
+## 84           6.0         2.7          5.1         1.6
+## 85           5.4         3.0          4.5         1.5
+## 86           6.0         3.4          4.5         1.6
+## 87           6.7         3.1          4.7         1.5
+## 88           6.3         2.3          4.4         1.3
+## 89           5.6         3.0          4.1         1.3
+## 90           5.5         2.5          4.0         1.3
+## 91           5.5         2.6          4.4         1.2
+## 92           6.1         3.0          4.6         1.4
+## 93           5.8         2.6          4.0         1.2
+## 94           5.0         2.3          3.3         1.0
+## 95           5.6         2.7          4.2         1.3
+## 96           5.7         3.0          4.2         1.2
+## 97           5.7         2.9          4.2         1.3
+## 98           6.2         2.9          4.3         1.3
+## 99           5.1         2.5          3.0         1.1
+## 100          5.7         2.8          4.1         1.3
+## 101          6.3         3.3          6.0         2.5
+## 102          5.8         2.7          5.1         1.9
+## 103          7.1         3.0          5.9         2.1
+## 104          6.3         2.9          5.6         1.8
+## 105          6.5         3.0          5.8         2.2
+## 106          7.6         3.0          6.6         2.1
+## 107          4.9         2.5          4.5         1.7
+## 108          7.3         2.9          6.3         1.8
+## 109          6.7         2.5          5.8         1.8
+## 110          7.2         3.6          6.1         2.5
+## 111          6.5         3.2          5.1         2.0
+## 112          6.4         2.7          5.3         1.9
+## 113          6.8         3.0          5.5         2.1
+## 114          5.7         2.5          5.0         2.0
+## 115          5.8         2.8          5.1         2.4
+## 116          6.4         3.2          5.3         2.3
+## 117          6.5         3.0          5.5         1.8
+## 118          7.7         3.8          6.7         2.2
+## 119          7.7         2.6          6.9         2.3
+## 120          6.0         2.2          5.0         1.5
+## 121          6.9         3.2          5.7         2.3
+## 122          5.6         2.8          4.9         2.0
+## 123          7.7         2.8          6.7         2.0
+## 124          6.3         2.7          4.9         1.8
+## 125          6.7         3.3          5.7         2.1
+## 126          7.2         3.2          6.0         1.8
+## 127          6.2         2.8          4.8         1.8
+## 128          6.1         3.0          4.9         1.8
+## 129          6.4         2.8          5.6         2.1
+## 130          7.2         3.0          5.8         1.6
+## 131          7.4         2.8          6.1         1.9
+## 132          7.9         3.8          6.4         2.0
+## 133          6.4         2.8          5.6         2.2
+## 134          6.3         2.8          5.1         1.5
+## 135          6.1         2.6          5.6         1.4
+## 136          7.7         3.0          6.1         2.3
+## 137          6.3         3.4          5.6         2.4
+## 138          6.4         3.1          5.5         1.8
+## 139          6.0         3.0          4.8         1.8
+## 140          6.9         3.1          5.4         2.1
+## 141          6.7         3.1          5.6         2.4
+## 142          6.9         3.1          5.1         2.3
+## 143          5.8         2.7          5.1         1.9
+## 144          6.8         3.2          5.9         2.3
+## 145          6.7         3.3          5.7         2.5
+## 146          6.7         3.0          5.2         2.3
+## 147          6.3         2.5          5.0         1.9
+## 148          6.5         3.0          5.2         2.0
+## 149          6.2         3.4          5.4         2.3
+## 150          5.9         3.0          5.1         1.8</code></pre>
 </div>
 <div id="combining-chains-of-assertions" class="section level3">
 <h3>combining chains of assertions</h3>
@@ -602,14 +747,14 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <li>that the am and vs columns (automatic/manual and v/straight engine, respectively) contain 0s and 1s only</li>
 </ul>
 <p>This could be written thusly:</p>
-<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb61-1" data-line-number="1">mtcars <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb61-2" data-line-number="2"><span class="st">  </span><span class="kw">verify</span>(<span class="kw">has_all_names</span>(<span class="st">&quot;mpg&quot;</span>, <span class="st">&quot;vs&quot;</span>, <span class="st">&quot;am&quot;</span>)) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb61-3" data-line-number="3"><span class="st">  </span><span class="kw">verify</span>(<span class="kw">nrow</span>(mtcars) <span class="op">&gt;</span><span class="st"> </span><span class="dv">10</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb61-4" data-line-number="4"><span class="st">  </span><span class="kw">verify</span>(mpg <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb61-5" data-line-number="5"><span class="st">  </span><span class="kw">insist</span>(<span class="kw">within_n_sds</span>(<span class="dv">4</span>), mpg) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb61-6" data-line-number="6"><span class="st">  </span><span class="kw">assert</span>(<span class="kw">in_set</span>(<span class="dv">0</span>,<span class="dv">1</span>), am, vs) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb61-7" data-line-number="7"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb61-8" data-line-number="8"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb56-1" data-line-number="1">mtcars <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb56-2" data-line-number="2"><span class="st">  </span><span class="kw">verify</span>(<span class="kw">has_all_names</span>(<span class="st">&quot;mpg&quot;</span>, <span class="st">&quot;vs&quot;</span>, <span class="st">&quot;am&quot;</span>)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb56-3" data-line-number="3"><span class="st">  </span><span class="kw">verify</span>(<span class="kw">nrow</span>(mtcars) <span class="op">&gt;</span><span class="st"> </span><span class="dv">10</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb56-4" data-line-number="4"><span class="st">  </span><span class="kw">verify</span>(mpg <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb56-5" data-line-number="5"><span class="st">  </span><span class="kw">insist</span>(<span class="kw">within_n_sds</span>(<span class="dv">4</span>), mpg) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb56-6" data-line-number="6"><span class="st">  </span><span class="kw">assert</span>(<span class="kw">in_set</span>(<span class="dv">0</span>,<span class="dv">1</span>), am, vs) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb56-7" data-line-number="7"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb56-8" data-line-number="8"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
 <pre><code>## # A tibble: 3 x 2
 ##     cyl avg.mpg
 ##   &lt;dbl&gt;   &lt;dbl&gt;
@@ -619,15 +764,15 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <p>In an assertr chain with default options, <code>assert</code>, <code>assert_rows</code>, <code>insist</code>, <code>insist_rows</code>, and <code>verify</code> will stop at the first assertion that yields an error and not go on to process the assertions further down in the chain. For some needs, this is sensible behavior. There are times, however, when we might like to get a report of all assertion violations. For example, one might want to write an R program to download some dataset from the internet and get a detailed report of all deviations from expectation.</p>
 <p>The best thing to do for this use case, is to use the <code>chain_start</code>, and <code>chain_end</code> functions at the beginning and end of a chain of assertr assertions. When <code>chain_start</code> gets called with data, the data gets a special tag that tells the assertr assertions that follow to override their <code>success_fun</code> and <code>error_fun</code> values and replace them with <code>success_continue</code> (which passes the data along if the test passes) and <code>error_append</code> (which we’ve just discussed). After all relevant verifications, <code>chain_end</code> will receive the data (possibly with accumulated error messages attached) and, by default, print a report of all the errors that have been found since the start of the chain.</p>
 <p>Let’s see it in action!</p>
-<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb63-1" data-line-number="1">mtcars <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb63-2" data-line-number="2"><span class="st">  </span>chain_start <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb63-3" data-line-number="3"><span class="st">  </span><span class="kw">verify</span>(<span class="kw">nrow</span>(mtcars) <span class="op">&gt;</span><span class="st"> </span><span class="dv">10</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb63-4" data-line-number="4"><span class="st">  </span><span class="kw">verify</span>(mpg <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb63-5" data-line-number="5"><span class="st">  </span><span class="kw">insist</span>(<span class="kw">within_n_sds</span>(<span class="dv">4</span>), mpg) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb63-6" data-line-number="6"><span class="st">  </span><span class="kw">assert</span>(<span class="kw">in_set</span>(<span class="dv">0</span>,<span class="dv">1</span>), am, vs) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb63-7" data-line-number="7"><span class="st">  </span>chain_end <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb63-8" data-line-number="8"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb63-9" data-line-number="9"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb58-1" data-line-number="1">mtcars <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb58-2" data-line-number="2"><span class="st">  </span>chain_start <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb58-3" data-line-number="3"><span class="st">  </span><span class="kw">verify</span>(<span class="kw">nrow</span>(mtcars) <span class="op">&gt;</span><span class="st"> </span><span class="dv">10</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb58-4" data-line-number="4"><span class="st">  </span><span class="kw">verify</span>(mpg <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb58-5" data-line-number="5"><span class="st">  </span><span class="kw">insist</span>(<span class="kw">within_n_sds</span>(<span class="dv">4</span>), mpg) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb58-6" data-line-number="6"><span class="st">  </span><span class="kw">assert</span>(<span class="kw">in_set</span>(<span class="dv">0</span>,<span class="dv">1</span>), am, vs) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb58-7" data-line-number="7"><span class="st">  </span>chain_end <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb58-8" data-line-number="8"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb58-9" data-line-number="9"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
 <pre><code>## # A tibble: 3 x 2
 ##     cyl avg.mpg
 ##   &lt;dbl&gt;   &lt;dbl&gt;
@@ -636,19 +781,43 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 ## 3     8    15.1</code></pre>
 <p>Now <em>all</em> assertions will be checked and reported.</p>
 <p>Tip: we can make this whole thing look a lot better by abstracting out all the assertions:</p>
-<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb65-1" data-line-number="1">check_me &lt;-<span class="st"> </span>. <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb65-2" data-line-number="2"><span class="st">  </span>chain_start <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb65-3" data-line-number="3"><span class="st">  </span><span class="kw">verify</span>(<span class="kw">nrow</span>(mtcars) <span class="op">&gt;</span><span class="st"> </span><span class="dv">10</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb65-4" data-line-number="4"><span class="st">  </span><span class="kw">verify</span>(mpg <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb65-5" data-line-number="5"><span class="st">  </span><span class="kw">insist</span>(<span class="kw">within_n_sds</span>(<span class="dv">4</span>), mpg) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb65-6" data-line-number="6"><span class="st">  </span><span class="kw">assert</span>(<span class="kw">in_set</span>(<span class="dv">0</span>,<span class="dv">1</span>), am, vs)</a>
-<a class="sourceLine" id="cb65-7" data-line-number="7">  chain_end </a>
-<a class="sourceLine" id="cb65-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb65-9" data-line-number="9">mtcars <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb65-10" data-line-number="10"><span class="st">  </span>check_me <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb65-11" data-line-number="11"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb65-12" data-line-number="12"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb60-1" data-line-number="1">check_me &lt;-<span class="st"> </span>. <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb60-2" data-line-number="2"><span class="st">  </span>chain_start <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb60-3" data-line-number="3"><span class="st">  </span><span class="kw">verify</span>(<span class="kw">nrow</span>(mtcars) <span class="op">&gt;</span><span class="st"> </span><span class="dv">10</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb60-4" data-line-number="4"><span class="st">  </span><span class="kw">verify</span>(mpg <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb60-5" data-line-number="5"><span class="st">  </span><span class="kw">insist</span>(<span class="kw">within_n_sds</span>(<span class="dv">4</span>), mpg) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb60-6" data-line-number="6"><span class="st">  </span><span class="kw">assert</span>(<span class="kw">in_set</span>(<span class="dv">0</span>,<span class="dv">1</span>), am, vs)</a>
+<a class="sourceLine" id="cb60-7" data-line-number="7">  chain_end </a>
+<a class="sourceLine" id="cb60-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb60-9" data-line-number="9">mtcars <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb60-10" data-line-number="10"><span class="st">  </span>check_me <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb60-11" data-line-number="11"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb60-12" data-line-number="12"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
 <p>Awesome! Now we can add an arbitrary number of assertions, as the need arises, without touching the real logic.</p>
+</div>
+<div id="storing-validation-results" class="section level3">
+<h3>Storing validation results</h3>
+<p>You may want to store validation results within specified object. The best way for it is to create new validator object:</p>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb61-1" data-line-number="1">validator &lt;-<span class="st"> </span>Validator<span class="op">$</span><span class="kw">new</span>()</a></code></pre></div>
+<p>To write validation result in it just use:</p>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb62-1" data-line-number="1">mtcars <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb62-2" data-line-number="2"><span class="st">  </span>chain_start <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb62-3" data-line-number="3"><span class="st">  </span><span class="kw">verify</span>(<span class="dt">title =</span> <span class="st">&quot;Data should have more that 10 rows.&quot;</span>, <span class="kw">nrow</span>(.) <span class="op">&gt;</span><span class="st"> </span><span class="dv">10</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb62-4" data-line-number="4"><span class="st">  </span><span class="kw">verify</span>(<span class="dt">title =</span> <span class="st">&quot;mpg is positive.&quot;</span>, mpg <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb62-5" data-line-number="5"><span class="st">  </span><span class="kw">assert</span>(<span class="dt">title =</span> <span class="st">&quot;am and vs should have just 0 and 2 values.&quot;</span>, <span class="kw">in_set</span>(<span class="dv">0</span>,<span class="dv">2</span>), am, vs) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb62-6" data-line-number="6"><span class="st">  </span><span class="kw">chain_end</span>(<span class="dt">error_fun =</span> error_append) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb62-7" data-line-number="7"><span class="st">  </span>validator<span class="op">$</span><span class="kw">add_validations</span>(<span class="st">&quot;mtcars&quot;</span>)</a></code></pre></div>
+<p>And check the results in required format by:</p>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb63-1" data-line-number="1">validator<span class="op">$</span><span class="kw">get_validations</span>(<span class="dt">type =</span> <span class="st">&quot;data.frame&quot;</span>)</a></code></pre></div>
+<pre><code>## # A tibble: 4 x 7
+##   title   result validation_id is_obligate object message   num.violations
+##   &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;         &lt;lgl&gt;       &lt;chr&gt;  &lt;chr&gt;              &lt;int&gt;
+## 1 Data s… Passed Bp14g9cL9zGw… FALSE       mtcars &lt;NA&gt;                  NA
+## 2 mpg is… Passed UGE3eIQakPvi… FALSE       mtcars &lt;NA&gt;                  NA
+## 3 am and… Failed DMj084fQwC3q… FALSE       mtcars Column '…             13
+## 4 am and… Failed DMj084fQwC3q… FALSE       mtcars Column '…             14</code></pre>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb65-1" data-line-number="1">validator<span class="op">$</span><span class="kw">get_validations</span>(<span class="dt">type =</span> <span class="st">&quot;json&quot;</span>)</a></code></pre></div>
+<pre><code>## [1] &quot;{\&quot;title\&quot;:[\&quot;Data should have more that 10 rows.\&quot;,\&quot;mpg is positive.\&quot;,\&quot;am and vs should have just 0 and 2 values.\&quot;,\&quot;am and vs should have just 0 and 2 values.\&quot;],\&quot;result\&quot;:[\&quot;Passed\&quot;,\&quot;Passed\&quot;,\&quot;Failed\&quot;,\&quot;Failed\&quot;],\&quot;validation_id\&quot;:[\&quot;Bp14g9cL9zGwoAaWPiAM\&quot;,\&quot;UGE3eIQakPviGvyvMf4V\&quot;,\&quot;DMj084fQwC3q5PcRKSZI\&quot;,\&quot;DMj084fQwC3q5PcRKSZI\&quot;],\&quot;is_obligate\&quot;:[false,false,false,false],\&quot;object\&quot;:[\&quot;mtcars\&quot;,\&quot;mtcars\&quot;,\&quot;mtcars\&quot;,\&quot;mtcars\&quot;],\&quot;message\&quot;:[\&quot;NA\&quot;,\&quot;NA\&quot;,\&quot;Column 'am' violates assertion 'in_set(0, 2)' 13 times\&quot;,\&quot;Column 'vs' violates assertion 'in_set(0, 2)' 14 times\&quot;],\&quot;num.violations\&quot;:[\&quot;NA\&quot;,\&quot;NA\&quot;,13,14]}&quot;</code></pre>
 </div>
 <div id="advanced-send-email-reports-using-custom-error-functions" class="section level3">
 <h3>advanced: send email reports using custom error functions</h3>
@@ -658,45 +827,45 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <p>You can specify your own, though, to hijack this behavior and redirect flow-of-control wherever you want.</p>
 <p>Your custom error function must take, as its first argument, a list of <code>assertr_error</code> S3 objects. The second argument must be the <code>data.frame</code> that the verb is computing on. Every error function must take this because there may be some other errors that are attached to the <code>data.frame</code>’s <code>assertr_errors</code> attribute leftover from other previous assertions.</p>
 <p>Below we are going to build a function that takes a list of <code>assertr_errors</code>, gets a string representation of the errors and emails it to someone before halting execution. We will use the <code>mailR</code> package to send the mail.</p>
-<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb66-1" data-line-number="1"><span class="kw">library</span>(mailR)</a>
-<a class="sourceLine" id="cb66-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb66-3" data-line-number="3">email_me &lt;-<span class="st"> </span><span class="cf">function</span>(list_of_errors, <span class="dt">data=</span><span class="ot">NULL</span>, ...){</a>
-<a class="sourceLine" id="cb66-4" data-line-number="4">  <span class="co"># we are checking to see if there are any errors that</span></a>
-<a class="sourceLine" id="cb66-5" data-line-number="5">  <span class="co"># are still attached to the data.frame</span></a>
-<a class="sourceLine" id="cb66-6" data-line-number="6">  <span class="cf">if</span>(<span class="op">!</span><span class="kw">is.null</span>(data) <span class="op">&amp;&amp;</span><span class="st"> </span><span class="op">!</span><span class="kw">is.null</span>(<span class="kw">attr</span>(data, <span class="st">&quot;assertr_errors&quot;</span>)))</a>
-<a class="sourceLine" id="cb66-7" data-line-number="7">    errors &lt;-<span class="st"> </span><span class="kw">append</span>(<span class="kw">attr</span>(data, <span class="st">&quot;assertr_errors&quot;</span>), errors)</a>
-<a class="sourceLine" id="cb66-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb66-9" data-line-number="9">  num.of.errors &lt;-<span class="st"> </span><span class="kw">length</span>(list_of_errors)</a>
-<a class="sourceLine" id="cb66-10" data-line-number="10"></a>
-<a class="sourceLine" id="cb66-11" data-line-number="11">  preface &lt;-<span class="st"> </span><span class="kw">sprintf</span>(<span class="st">&quot;There %s %d error%s:</span><span class="ch">\n</span><span class="st">&quot;</span>,</a>
-<a class="sourceLine" id="cb66-12" data-line-number="12">                     <span class="kw">ifelse</span>(num.of.errors<span class="op">==</span><span class="dv">1</span>,<span class="st">&quot;is&quot;</span>, <span class="st">&quot;are&quot;</span>),</a>
-<a class="sourceLine" id="cb66-13" data-line-number="13">                     num.of.errors,</a>
-<a class="sourceLine" id="cb66-14" data-line-number="14">                     <span class="kw">ifelse</span>(num.of.errors<span class="op">==</span><span class="dv">1</span>,<span class="st">&quot;&quot;</span>, <span class="st">&quot;s&quot;</span>))</a>
-<a class="sourceLine" id="cb66-15" data-line-number="15"></a>
-<a class="sourceLine" id="cb66-16" data-line-number="16">  <span class="co"># all `assertr_error` S3 objects have `print` and `summary` methods</span></a>
-<a class="sourceLine" id="cb66-17" data-line-number="17">  <span class="co"># here, we will call `print` on all of the errors since `print`</span></a>
-<a class="sourceLine" id="cb66-18" data-line-number="18">  <span class="co"># will give us the complete/unabridged error report</span></a>
-<a class="sourceLine" id="cb66-19" data-line-number="19">  error_string &lt;-<span class="st"> </span><span class="kw">capture.output</span>(tmp &lt;-<span class="st"> </span><span class="kw">lapply</span>(list_of_errors,</a>
-<a class="sourceLine" id="cb66-20" data-line-number="20">                                               <span class="cf">function</span>(x){</a>
-<a class="sourceLine" id="cb66-21" data-line-number="21">                                                 <span class="kw">cat</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">- &quot;</span>);</a>
-<a class="sourceLine" id="cb66-22" data-line-number="22">                                                 <span class="kw">print</span>(x);</a>
-<a class="sourceLine" id="cb66-23" data-line-number="23">                                                 <span class="kw">return</span>();}))</a>
-<a class="sourceLine" id="cb66-24" data-line-number="24">  error_string &lt;-<span class="st"> </span><span class="kw">c</span>(preface, error_string)</a>
-<a class="sourceLine" id="cb66-25" data-line-number="25">  error_string &lt;-<span class="st"> </span>error_string <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">paste0</span>(<span class="dt">collapse=</span><span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
-<a class="sourceLine" id="cb66-26" data-line-number="26"></a>
-<a class="sourceLine" id="cb66-27" data-line-number="27">  <span class="kw">send.mail</span>(<span class="dt">from=</span><span class="st">&quot;assertr@gmail.com&quot;</span>, <span class="dt">to=</span><span class="st">&quot;YOU@gmail.com&quot;</span>,</a>
-<a class="sourceLine" id="cb66-28" data-line-number="28">            <span class="dt">subject=</span><span class="st">&quot;error from assertr&quot;</span>, <span class="dt">body=</span>error_string,</a>
-<a class="sourceLine" id="cb66-29" data-line-number="29">            <span class="dt">smtp =</span> <span class="kw">list</span>(<span class="dt">host.name=</span><span class="st">&quot;aspmx.l.google.com&quot;</span>, <span class="dt">port=</span><span class="dv">25</span>),</a>
-<a class="sourceLine" id="cb66-30" data-line-number="30">            <span class="dt">authenticate =</span> <span class="ot">FALSE</span>, <span class="dt">send=</span><span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb66-31" data-line-number="31">  <span class="kw">stop</span>(<span class="st">&quot;assertr stopped execution&quot;</span>, <span class="dt">call.=</span><span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb66-32" data-line-number="32">}</a>
-<a class="sourceLine" id="cb66-33" data-line-number="33"></a>
-<a class="sourceLine" id="cb66-34" data-line-number="34">questionable_mtcars <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb66-35" data-line-number="35"><span class="st">  </span>chain_start <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb66-36" data-line-number="36"><span class="st">  </span><span class="kw">verify</span>(<span class="kw">nrow</span>(.) <span class="op">&gt;</span><span class="st"> </span><span class="dv">10</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb66-37" data-line-number="37"><span class="st">  </span><span class="kw">insist</span>(<span class="kw">within_n_sds</span>(<span class="dv">4</span>), mpg) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb66-38" data-line-number="38"><span class="st">  </span><span class="co"># ...</span></a>
-<a class="sourceLine" id="cb66-39" data-line-number="39"><span class="st">  </span><span class="kw">chain_end</span>(<span class="dt">error_fun=</span>email.me)</a></code></pre></div>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb67-1" data-line-number="1"><span class="kw">library</span>(mailR)</a>
+<a class="sourceLine" id="cb67-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb67-3" data-line-number="3">email_me &lt;-<span class="st"> </span><span class="cf">function</span>(list_of_errors, <span class="dt">data=</span><span class="ot">NULL</span>, ...){</a>
+<a class="sourceLine" id="cb67-4" data-line-number="4">  <span class="co"># we are checking to see if there are any errors that</span></a>
+<a class="sourceLine" id="cb67-5" data-line-number="5">  <span class="co"># are still attached to the data.frame</span></a>
+<a class="sourceLine" id="cb67-6" data-line-number="6">  <span class="cf">if</span>(<span class="op">!</span><span class="kw">is.null</span>(data) <span class="op">&amp;&amp;</span><span class="st"> </span><span class="op">!</span><span class="kw">is.null</span>(<span class="kw">attr</span>(data, <span class="st">&quot;assertr_errors&quot;</span>)))</a>
+<a class="sourceLine" id="cb67-7" data-line-number="7">    errors &lt;-<span class="st"> </span><span class="kw">append</span>(<span class="kw">attr</span>(data, <span class="st">&quot;assertr_errors&quot;</span>), errors)</a>
+<a class="sourceLine" id="cb67-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb67-9" data-line-number="9">  num.of.errors &lt;-<span class="st"> </span><span class="kw">length</span>(list_of_errors)</a>
+<a class="sourceLine" id="cb67-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb67-11" data-line-number="11">  preface &lt;-<span class="st"> </span><span class="kw">sprintf</span>(<span class="st">&quot;There %s %d error%s:</span><span class="ch">\n</span><span class="st">&quot;</span>,</a>
+<a class="sourceLine" id="cb67-12" data-line-number="12">                     <span class="kw">ifelse</span>(num.of.errors<span class="op">==</span><span class="dv">1</span>,<span class="st">&quot;is&quot;</span>, <span class="st">&quot;are&quot;</span>),</a>
+<a class="sourceLine" id="cb67-13" data-line-number="13">                     num.of.errors,</a>
+<a class="sourceLine" id="cb67-14" data-line-number="14">                     <span class="kw">ifelse</span>(num.of.errors<span class="op">==</span><span class="dv">1</span>,<span class="st">&quot;&quot;</span>, <span class="st">&quot;s&quot;</span>))</a>
+<a class="sourceLine" id="cb67-15" data-line-number="15"></a>
+<a class="sourceLine" id="cb67-16" data-line-number="16">  <span class="co"># all `assertr_error` S3 objects have `print` and `summary` methods</span></a>
+<a class="sourceLine" id="cb67-17" data-line-number="17">  <span class="co"># here, we will call `print` on all of the errors since `print`</span></a>
+<a class="sourceLine" id="cb67-18" data-line-number="18">  <span class="co"># will give us the complete/unabridged error report</span></a>
+<a class="sourceLine" id="cb67-19" data-line-number="19">  error_string &lt;-<span class="st"> </span><span class="kw">capture.output</span>(tmp &lt;-<span class="st"> </span><span class="kw">lapply</span>(list_of_errors,</a>
+<a class="sourceLine" id="cb67-20" data-line-number="20">                                               <span class="cf">function</span>(x){</a>
+<a class="sourceLine" id="cb67-21" data-line-number="21">                                                 <span class="kw">cat</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">- &quot;</span>);</a>
+<a class="sourceLine" id="cb67-22" data-line-number="22">                                                 <span class="kw">print</span>(x);</a>
+<a class="sourceLine" id="cb67-23" data-line-number="23">                                                 <span class="kw">return</span>();}))</a>
+<a class="sourceLine" id="cb67-24" data-line-number="24">  error_string &lt;-<span class="st"> </span><span class="kw">c</span>(preface, error_string)</a>
+<a class="sourceLine" id="cb67-25" data-line-number="25">  error_string &lt;-<span class="st"> </span>error_string <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">paste0</span>(<span class="dt">collapse=</span><span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb67-26" data-line-number="26"></a>
+<a class="sourceLine" id="cb67-27" data-line-number="27">  <span class="kw">send.mail</span>(<span class="dt">from=</span><span class="st">&quot;assertr@gmail.com&quot;</span>, <span class="dt">to=</span><span class="st">&quot;YOU@gmail.com&quot;</span>,</a>
+<a class="sourceLine" id="cb67-28" data-line-number="28">            <span class="dt">subject=</span><span class="st">&quot;error from assertr&quot;</span>, <span class="dt">body=</span>error_string,</a>
+<a class="sourceLine" id="cb67-29" data-line-number="29">            <span class="dt">smtp =</span> <span class="kw">list</span>(<span class="dt">host.name=</span><span class="st">&quot;aspmx.l.google.com&quot;</span>, <span class="dt">port=</span><span class="dv">25</span>),</a>
+<a class="sourceLine" id="cb67-30" data-line-number="30">            <span class="dt">authenticate =</span> <span class="ot">FALSE</span>, <span class="dt">send=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb67-31" data-line-number="31">  <span class="kw">stop</span>(<span class="st">&quot;assertr stopped execution&quot;</span>, <span class="dt">call.=</span><span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb67-32" data-line-number="32">}</a>
+<a class="sourceLine" id="cb67-33" data-line-number="33"></a>
+<a class="sourceLine" id="cb67-34" data-line-number="34">questionable_mtcars <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb67-35" data-line-number="35"><span class="st">  </span>chain_start <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb67-36" data-line-number="36"><span class="st">  </span><span class="kw">verify</span>(<span class="kw">nrow</span>(.) <span class="op">&gt;</span><span class="st"> </span><span class="dv">10</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb67-37" data-line-number="37"><span class="st">  </span><span class="kw">insist</span>(<span class="kw">within_n_sds</span>(<span class="dv">4</span>), mpg) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb67-38" data-line-number="38"><span class="st">  </span><span class="co"># ...</span></a>
+<a class="sourceLine" id="cb67-39" data-line-number="39"><span class="st">  </span><span class="kw">chain_end</span>(<span class="dt">error_fun=</span>email.me)</a></code></pre></div>
 <p>(this particular <code>send.mail</code> formulation will only work for gmail recipients; see the <code>mailR</code> documentation for more information)</p>
 <p>Now you’ll get notified of <s>any</s> all failed assertions via email. Groovy!</p>
 </div>
@@ -705,16 +874,16 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <p><code>assertr</code> is build with robustness, correctness, and extensibility in mind. Just like <code>assertr</code> makes it easy to create your own custom predicates, so too does this package make it easy to create your own custom predicate generators.</p>
 <p>Okay… so its, perhaps, not <em>easy</em> because predicate generators by nature are functions that return functions. But it’s possible!</p>
 <p>Let’s say you wanted to create a predicate generator that checks if all elements of a vector are within 3 times the vector’s interquartile range from the median. We need to create a function that looks like this</p>
-<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb67-1" data-line-number="1">within_<span class="dv">3</span>_iqrs &lt;-<span class="st"> </span><span class="cf">function</span>(a_vector){</a>
-<a class="sourceLine" id="cb67-2" data-line-number="2">  the_median &lt;-<span class="st"> </span><span class="kw">median</span>(a_vector)</a>
-<a class="sourceLine" id="cb67-3" data-line-number="3">  the_iqr &lt;-<span class="st"> </span><span class="kw">IQR</span>(a_vector)</a>
-<a class="sourceLine" id="cb67-4" data-line-number="4">  <span class="kw">within_bounds</span>((the_median<span class="op">-</span>the_iqr<span class="op">*</span><span class="dv">3</span>), (the_median<span class="op">+</span>the_iqr<span class="op">*</span><span class="dv">3</span>))</a>
-<a class="sourceLine" id="cb67-5" data-line-number="5">}</a></code></pre></div>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb68-1" data-line-number="1">within_<span class="dv">3</span>_iqrs &lt;-<span class="st"> </span><span class="cf">function</span>(a_vector){</a>
+<a class="sourceLine" id="cb68-2" data-line-number="2">  the_median &lt;-<span class="st"> </span><span class="kw">median</span>(a_vector)</a>
+<a class="sourceLine" id="cb68-3" data-line-number="3">  the_iqr &lt;-<span class="st"> </span><span class="kw">IQR</span>(a_vector)</a>
+<a class="sourceLine" id="cb68-4" data-line-number="4">  <span class="kw">within_bounds</span>((the_median<span class="op">-</span>the_iqr<span class="op">*</span><span class="dv">3</span>), (the_median<span class="op">+</span>the_iqr<span class="op">*</span><span class="dv">3</span>))</a>
+<a class="sourceLine" id="cb68-5" data-line-number="5">}</a></code></pre></div>
 <p>Now, we can use it on <code>mpg</code> from <code>mtcars</code> like so:</p>
-<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb68-1" data-line-number="1">mtcars <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb68-2" data-line-number="2"><span class="st">  </span><span class="kw">insist</span>(within_<span class="dv">3</span>_iqrs, mpg) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb68-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb68-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
+<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb69-1" data-line-number="1">mtcars <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb69-2" data-line-number="2"><span class="st">  </span><span class="kw">insist</span>(within_<span class="dv">3</span>_iqrs, mpg) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb69-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb69-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
 <pre><code>## # A tibble: 3 x 2
 ##     cyl avg.mpg
 ##   &lt;dbl&gt;   &lt;dbl&gt;
@@ -727,18 +896,18 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <li>We lose the ability to choose what optional arguments (if any) that we give to the returned <code>within_bounds</code> predicate.</li>
 </ol>
 <p>Now we have to write a function that returns a function that returns a function…</p>
-<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb70-1" data-line-number="1">within_n_iqrs &lt;-<span class="st"> </span><span class="cf">function</span>(n, ...){</a>
-<a class="sourceLine" id="cb70-2" data-line-number="2">  <span class="cf">function</span>(a_vector){</a>
-<a class="sourceLine" id="cb70-3" data-line-number="3">    the_median &lt;-<span class="st"> </span><span class="kw">median</span>(a_vector)</a>
-<a class="sourceLine" id="cb70-4" data-line-number="4">    the_iqr &lt;-<span class="st"> </span><span class="kw">IQR</span>(a_vector)</a>
-<a class="sourceLine" id="cb70-5" data-line-number="5">    <span class="kw">within_bounds</span>((the_median<span class="op">-</span>the_iqr<span class="op">*</span>n), (the_median<span class="op">+</span>the_iqr<span class="op">*</span>n), ...)</a>
-<a class="sourceLine" id="cb70-6" data-line-number="6">  }</a>
-<a class="sourceLine" id="cb70-7" data-line-number="7">}</a></code></pre></div>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb71-1" data-line-number="1">within_n_iqrs &lt;-<span class="st"> </span><span class="cf">function</span>(n, ...){</a>
+<a class="sourceLine" id="cb71-2" data-line-number="2">  <span class="cf">function</span>(a_vector){</a>
+<a class="sourceLine" id="cb71-3" data-line-number="3">    the_median &lt;-<span class="st"> </span><span class="kw">median</span>(a_vector)</a>
+<a class="sourceLine" id="cb71-4" data-line-number="4">    the_iqr &lt;-<span class="st"> </span><span class="kw">IQR</span>(a_vector)</a>
+<a class="sourceLine" id="cb71-5" data-line-number="5">    <span class="kw">within_bounds</span>((the_median<span class="op">-</span>the_iqr<span class="op">*</span>n), (the_median<span class="op">+</span>the_iqr<span class="op">*</span>n), ...)</a>
+<a class="sourceLine" id="cb71-6" data-line-number="6">  }</a>
+<a class="sourceLine" id="cb71-7" data-line-number="7">}</a></code></pre></div>
 <p>Much better! Now, if we want to check that every <code>mpg</code> from <code>mtcars</code> is within 5 IQRs of the median and <em>not allow NA values</em> we can do so like this:</p>
-<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb71-1" data-line-number="1">mtcars <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb71-2" data-line-number="2"><span class="st">  </span><span class="kw">insist</span>(<span class="kw">within_n_iqrs</span>(<span class="dv">5</span>), mpg) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb71-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb71-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb72-1" data-line-number="1">mtcars <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb72-2" data-line-number="2"><span class="st">  </span><span class="kw">insist</span>(<span class="kw">within_n_iqrs</span>(<span class="dv">5</span>), mpg) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb72-3" data-line-number="3"><span class="st">  </span><span class="kw">group_by</span>(cyl) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb72-4" data-line-number="4"><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">avg.mpg=</span><span class="kw">mean</span>(mpg))</a></code></pre></div>
 <pre><code>## # A tibble: 3 x 2
 ##     cyl avg.mpg
 ##   &lt;dbl&gt;   &lt;dbl&gt;

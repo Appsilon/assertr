@@ -613,7 +613,30 @@ mtcars %>%
 Awesome! Now we can add an arbitrary number of assertions, as the need arises,
 without touching the real logic.
 
+### Storing validation results
 
+You may want to store validation results within specified object.
+The best way for it is to create new validator object:
+```{r purl = FALSE}
+validator <- Validator$new()
+```
+
+To write validation result in it just use:
+```{r purl = FALSE}
+mtcars %>%
+  chain_start %>% 
+  verify(title = "Data should have more that 10 rows.", nrow(.) > 10) %>%
+  verify(title = "mpg is positive.", mpg > 0) %>%
+  assert(title = "am and vs should have just 0 and 2 values.", in_set(0,2), am, vs) %>% 
+  chain_end(error_fun = error_append) %>% 
+  validator$add_validations("mtcars")
+```
+
+And check the results in required format by:
+```{r purl = FALSE}
+validator$get_validations(type = "data.frame")
+validator$get_validations(type = "json")
+```
 
 ### advanced: send email reports using custom error functions
 
