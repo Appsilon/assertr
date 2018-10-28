@@ -462,12 +462,11 @@ cosine distances are constained from -1 to 1, it is easy to use a non-dynamic
 predicate to disallow certain values.
 
 
-### success and error functions
+### success, error and skip functions
 
 The behavior of functions like `assert`, `assert_rows`,
 `insist`, `insist_rows`, `verify` when the assertion
-passes or fails is configurable via the `success_fun`
-and `error_fun` parameters, respectively.
+passes and fails is configurable via the `success_fun`, `error_fun` and `skip_fun` parameters.
 
 The `success_fun` parameter takes a function that takes
 the data passed to the assertion function as a parameter. You can
@@ -497,6 +496,9 @@ provided by this package:
    the errors can be displayed at the end of the chain.
 
   * `error_logical` - returns FALSE
+  
+  * `append_as_warning` - Attaches the error as warning rule to a special
+   attribute of `data` and returns the data.
 
   * `just_warn` - Prints a summary of the errors but does
    not halt execution, it just issues a warning.
@@ -504,7 +506,27 @@ provided by this package:
   * `warn_report` - Prints all the information available
   about the errors but does not halt execution, it just issues a warning.
 
+The `skip_fun` parameter takes a function that takes
+the data passed to the assertion function as a parameter. When some of 
+obligated data assertion fails, we are not able to perform following checks.
+Corrupted data is not validated and the function set an action about what should 
+be done during current assertion.
+You can use here all of above methods. The default one is `success_continue` what
+means that thw whole data is passed to another rule.
 
+See below example when one of requires column is missing:
+```{r purl=FALSE, error=TRUE}
+mistake <- iris
+mistake$Species <- NULL
+
+mistake %>% 
+  verify("Species" %in% names(.)) %>% 
+  verify(in_set("setosa", "versicolor", "virginica"), Species)
+
+mistake %>% 
+  verify("Species" %in% names(.), mark_data_corrupted_on_failure = TRUE) %>% 
+  verify(in_set("setosa", "versicolor", "virginica"), Species)
+```
 
 ### combining chains of assertions
 
@@ -740,29 +762,9 @@ Super!
 
 ### advanced: programming with assertion functions
 
-The assertion functions we have been using so far have been using non-standard
-evaluation (we haven't been quoting the column names, for example).
-Though very very nice in most cases, non-standard evaluation causes issues when
-trying to programmatically use assertion functions. Let's say you want to check
-the z-scores of a column from `mtcars` of the user's choice; you ask the user
-for a column and store that in a variable. If you try to use that variable in
-an `insist` (or `assert`, etc...) you'll get an error
-
-
-```{r error=TRUE,  purl = FALSE}
-# a.column <- readline("Enter a column name: ")
-# pretend user said "vs"
-a.column <- "vs"
-insist(mtcars, within_n_sds(3), a.column)
-```
-
-Good thing all of `assertr`'s assertion verbs have standard evaluation
-counterparts! All you have to do to use them is put an underscore ("_") at
-the end of the function name...
-
-```{r error=TRUE,  purl = FALSE}
-insist_(mtcars, within_n_sds(3), a.column) %>%
-  head(n=2)
-```
-
-Nifty!
+These assertion functions use the [tidyeval](https://rpubs.com/hadley/dplyr-programming) framework.  In the past,
+programming in a tidyverse-like setting was accomplished through
+standard evaluation versions of verbs, which used functions postfixed
+with an underscore: `insist_` instead of `insist`, for example.  However,
+when tidyeval was made popular with `dplyr` 0.7.0, this usage became deprecated,
+and therefore underscore-postfixed functions are no longer part of `assertr`.

@@ -22,6 +22,13 @@
 #'                    returning \code{data}.
 #' @param error_fun Function to call if assertion fails. Defaults to printing
 #'                  a summary of all errors.
+#' @param skip_fun Function to call if data is corrupted (one of previous assertions was obligate and failed).
+#'                 Defaults to returning \code{data}.
+#' @param title Title of assertion rule.
+#' @param mark_data_corrupted_on_failure Mark assertion as obligate. When obligate assertion fails, the following
+#'                                       rules will not be executed.
+#' @param ignore_chain_funs If TRUE, error_fun defined in chain_start is ignored.
+#'
 #'
 #' @details For examples of possible choices for the \code{success_fun} and
 #' \code{error_fun} parameters, run \code{help("success_and_error_functions")}
@@ -153,6 +160,12 @@ assert <- function(data, predicate, ...,
 #'                    returning \code{data}.
 #' @param error_fun Function to call if assertion fails. Defaults to printing
 #'                  a summary of all errors.
+#' @param skip_fun Function to call if data is corrupted (one of previous assertions was obligate and failed).
+#'                 Defaults to returning \code{data}.
+#' @param title Title of assertion rule.
+#' @param mark_data_corrupted_on_failure Mark assertion as obligate. When obligate assertion fails, the following
+#'                                       rules will not be executed.
+#' @param ignore_chain_funs If TRUE, error_fun defined in chain_start is ignored.
 #'
 #' @details For examples of possible choices for the \code{success_fun} and
 #' \code{error_fun} parameters, run \code{help("success_and_error_functions")}
@@ -280,6 +293,12 @@ assert_rows <- function(data, row_reduction_fn, predicate, ...,
 #'                    returning \code{data}.
 #' @param error_fun Function to call if assertion fails. Defaults to printing
 #'                  a summary of all errors.
+#' @param skip_fun Function to call if data is corrupted (one of previous assertions was obligate and failed).
+#'                 Defaults to returning \code{data}.
+#' @param title Title of assertion rule.
+#' @param mark_data_corrupted_on_failure Mark assertion as obligate. When obligate assertion fails, the following
+#'                                       rules will not be executed.
+#' @param ignore_chain_funs If TRUE, error_fun defined in chain_start is ignored.
 #'
 #' @details For examples of possible choices for the \code{success_fun} and
 #' \code{error_fun} parameters, run \code{help("success_and_error_functions")}
@@ -416,6 +435,12 @@ insist <- function(data, predicate_generator, ...,
 #'                    returning \code{data}.
 #' @param error_fun Function to call if assertion fails. Defaults to printing
 #'                  a summary of all errors.
+#' @param skip_fun Function to call if data is corrupted (one of previous assertions was obligate and failed).
+#'                 Defaults to returning \code{data}.
+#' @param title Title of assertion rule.
+#' @param mark_data_corrupted_on_failure Mark assertion as obligate. When obligate assertion fails, the following
+#'                                       rules will not be executed.
+#' @param ignore_chain_funs If TRUE, error_fun defined in chain_start is ignored.
 #'
 #' @details For examples of possible choices for the \code{success_fun} and
 #' \code{error_fun} parameters, run \code{help("success_and_error_functions")}
@@ -533,6 +558,12 @@ insist_rows <- function(data, row_reduction_fn, predicate_generator, ...,
 #'                    returning \code{data}.
 #' @param error_fun Function to call if assertion fails. Defaults to printing
 #'                  a summary of all errors.
+#' @param skip_fun Function to call if data is corrupted (one of previous assertions was obligate and failed).
+#'                 Defaults to returning \code{data}.
+#' @param title Title of assertion rule.
+#' @param mark_data_corrupted_on_failure Mark assertion as obligate. When obligate assertion fails, the following
+#'                                       rules will not be executed.
+#' @param ignore_chain_funs If TRUE, error_fun defined in chain_start is ignored.
 #'
 #' @details For examples of possible choices for the \code{success_fun} and
 #' \code{error_fun} parameters, run \code{help("success_and_error_functions")}

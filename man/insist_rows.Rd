@@ -36,6 +36,16 @@ returning \code{data}.}
 \item{error_fun}{Function to call if assertion fails. Defaults to printing
 a summary of all errors.}
 
+\item{skip_fun}{Function to call if data is corrupted (one of previous assertions was obligate and failed).
+Defaults to returning \code{data}.}
+
+\item{title}{Title of assertion rule.}
+
+\item{mark_data_corrupted_on_failure}{Mark assertion as obligate. When obligate assertion fails, the following
+rules will not be executed.}
+
+\item{ignore_chain_funs}{If TRUE, error_fun defined in chain_start is ignored.}
+
 \item{.dots}{Use insist_rows_() to select columns using standard evaluation.}
 }
 \value{
