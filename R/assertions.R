@@ -99,7 +99,8 @@ assert <- function(data, predicate, ...,
   if (!is.null(title)) {
     attr(data, "assertr_results") <- append(
       attr(data, "assertr_results"),
-      list(data.frame(title = title, result = result, validation_id = validation_id, stringsAsFactors = FALSE)))
+      list(data.frame(title = title, result = result, validation_id = validation_id,
+                      is_obligate = mark_data_corrupted_on_failure, stringsAsFactors = FALSE)))
   }
 
   # if all checks pass *and* there are no leftover errors
@@ -230,7 +231,8 @@ assert_rows <- function(data, row_reduction_fn, predicate, ...,
     result <- all(log.vec)
     attr(data, "assertr_results") <- append(
       attr(data, "assertr_results"),
-      list(data.frame(title = title, result = result, validation_id = validation_id, stringsAsFactors = FALSE)))
+      list(data.frame(title = title, result = result, validation_id = validation_id,
+                      is_obligate = mark_data_corrupted_on_failure, stringsAsFactors = FALSE)))
   }
 
   # if all checks pass *and* there are no leftover errors
@@ -356,7 +358,8 @@ insist <- function(data, predicate_generator, ...,
     result <- all(log.mat)
     attr(data, "assertr_results") <- append(
       attr(data, "assertr_results"),
-      list(data.frame(title = title, result = result, validation_id = validation_id, stringsAsFactors = FALSE)))
+      list(data.frame(title = title, result = result, validation_id = validation_id,
+                      is_obligate = mark_data_corrupted_on_failure, stringsAsFactors = FALSE)))
   }
 
   # if all checks pass *and* there are no leftover errors
@@ -491,7 +494,8 @@ insist_rows <- function(data, row_reduction_fn, predicate_generator, ...,
     result <- all(log.vec)
     attr(data, "assertr_results") <- append(
       attr(data, "assertr_results"),
-      list(data.frame(title = title, result = result, validation_id = validation_id, stringsAsFactors = FALSE)))
+      list(data.frame(title = title, result = result, validation_id = validation_id,
+                      is_obligate = mark_data_corrupted_on_failure, stringsAsFactors = FALSE)))
   }
 
   # if all checks pass *and* there are no leftover errors
@@ -606,7 +610,8 @@ verify <- function(data, expr,
     result <- all(logical.results)
     attr(data, "assertr_results") <- append(
       attr(data, "assertr_results"),
-      list(data.frame(title = title, result = result, validation_id = validation_id, stringsAsFactors = FALSE)))
+      list(data.frame(title = title, result = result, validation_id = validation_id,
+                      is_obligate = mark_data_corrupted_on_failure, stringsAsFactors = FALSE)))
   }
 
   # if all checks pass *and* there are no leftover errors
