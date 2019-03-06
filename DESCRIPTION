@@ -1,7 +1,7 @@
 Package: assertr
 Type: Package
 Title: Assertive Programming for R Analysis Pipelines
-Version: 2.0.2.4
+Version: 2.0.2.5
 Authors@R: person("Tony", "Fischetti",
               email="tony.fischetti@gmail.com",
               role = c("aut", "cre"))
@@ -26,7 +26,7 @@ Suggests:
     testthat,
     magrittr
 VignetteBuilder: knitr
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 X-schema.org-applicationCategory: Computing Infrastructure
 X-schema.org-keywords: ropensci, defensive, audit, assert, assertions, sanitization, workflow, checking
 X-schema.org-isPartOf: https://ropensci.org
