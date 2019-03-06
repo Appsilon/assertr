@@ -604,7 +604,7 @@ insist_rows <- function(data, row_reduction_fn, predicate_generator, ...,
 #'
 #'
 #' @export
-verify <- function(data, expr, column_name = NULL,
+verify <- function(data, expr,
                    success_fun=success_continue, error_fun=error_stop, skip_fun=success_continue,
                    title = NULL, mark_data_corrupted_on_failure = FALSE, ignore_chain_funs = FALSE){
   skip_rule <- attr(data, "is_corrupted")
@@ -645,18 +645,14 @@ verify <- function(data, expr, column_name = NULL,
     return(success_fun(data))
   num.violations <- sum(!logical.results)
   if(num.violations==0) return(error_fun(list(), data=data))
-  if (!is.null(column_name)) {
-    index.of.violations <- which(logical.results)
-    offending.elements <- data[[column_name]][index.of.violations]
-    error <- make.assertr.assert.error(title,
-                                       column_name,
-                                       num.violations,
-                                       index.of.violations,
-                                       offending.elements,
-                                       validation_id)
-  } else {
-    error <- make.assertr.verify.error(num.violations, paste(deparse(expr), collapse = " "), validation_id)
-  }
+  index.of.violations <- which(!logical.results)
+  error <- make.assertr.verify.error(
+    num.violations,
+    index.of.violations,
+    paste(deparse(expr), collapse = " "),
+    validation_id
+  )
+
   if (mark_data_corrupted_on_failure)
     attr(data, "is_corrupted") <- TRUE
   error_fun(list(error), data=data)

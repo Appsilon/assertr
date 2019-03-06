@@ -97,11 +97,12 @@ summary.assertr_assert_error <- function(object, ...){
 #####################
 # used by "verify"
 
-make.assertr.verify.error <- function(num.violations, the_call, validation_id){
+make.assertr.verify.error <- function(num.violations, index.of.violations, the_call, validation_id){
   sing.plur <- if (num.violations==1) " failure)" else " failures)"
   msg <- paste0("verification [", the_call, "] failed! (", num.violations, sing.plur)
   this_error <- list(message = msg,
                      num.violations = num.violations,
+                     index.of.violations = index.of.violations,
                      call = the_call,
                      validation_id = validation_id)
   class(this_error) <- c("assertr_verify_error", "assertr_error",

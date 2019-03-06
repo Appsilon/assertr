@@ -4,7 +4,7 @@
 \alias{verify}
 \title{Raises error if expression is FALSE anywhere}
 \usage{
-verify(data, expr, column_name = NULL, success_fun = success_continue,
+verify(data, expr, success_fun = success_continue,
   error_fun = error_stop, skip_fun = success_continue, title = NULL,
   mark_data_corrupted_on_failure = FALSE, ignore_chain_funs = FALSE)
 }
