@@ -99,7 +99,8 @@ summary.assertr_assert_error <- function(object, ...){
 
 make.assertr.verify.error <- function(num.violations, index.of.violations, the_call, validation_id){
   sing.plur <- if (num.violations==1) " failure)" else " failures)"
-  msg <- paste0("verification [", the_call, "] failed! (", num.violations, sing.plur)
+  violations <- paste(index.of.violations, collapse = ", ")
+  msg <- paste0("verification [", the_call, "] failed! (", num.violations, sing.plur, " rows in data that violate rule: ", violations)
   this_error <- list(message = msg,
                      num.violations = num.violations,
                      index.of.violations = index.of.violations,
