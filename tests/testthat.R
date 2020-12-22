@@ -1,4 +1,4 @@
 library(testthat)
-library(assertr)
+library(data.validator)
 
-test_check("assertr")
+test_check("data.validator")

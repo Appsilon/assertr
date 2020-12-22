@@ -1,21 +1,31 @@
-packrat/lib*/
+# History files
 .Rhistory
-.DS_Store
-.Rproj.user
-.Rproj
 .Rapp.history
 
-# Object files
-*.o
-# Libraries
-*.lib
-*.a
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-# Executables
-*.exe
-*.out
-*.app
+# Session Data files
+.RData
+
+# Example code in package build process
+*-Ex.R
+
+# Output files from R CMD build
+/*.tar.gz
+package/*.tar.gz
+
+# Output files from R CMD check
+/*.Rcheck/
+
+# RStudio files
+.Rproj.user
+
+# produced vignettes
+vignettes/*.html
+vignettes/*.pdf
+
+# testing files
+validation_report.html
+validation_report.csv
+results.csv
+results.txt
+validation_log.txt
+
