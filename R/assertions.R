@@ -540,13 +540,13 @@ validate <- function(data, name, description = NULL) {
 #' @export
 assert_if <- function(data, expr, description = NA, obligatory = FALSE) {
   verify(data = data,
-                  expr = !!rlang::enexpr(expr),
-                  description = format_description(description),
-                  skip_chain_opts = FALSE,
-                  obligatory = obligatory,
-                  success_fun = success_append,
-                  error_fun = error_append,
-                  defect_fun = defect_append)
+         expr = !!rlang::enexpr(expr),
+         description = format_description(description),
+         skip_chain_opts = FALSE,
+         obligatory = obligatory,
+         success_fun = success_append,
+         error_fun = error_append,
+         defect_fun = defect_append)
 }
 
 #' @export
